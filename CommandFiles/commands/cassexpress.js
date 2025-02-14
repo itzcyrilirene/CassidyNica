@@ -6,7 +6,7 @@ export const meta = {
   description: "Advanced and Sophisticated way of managing bank system.",
   category: "Finance",
   noPrefix: "both",
-  otherNames: ["cexpress", "cbank", "bank"],
+  otherNames: ["cexpress", "cbank"],
   requirement: "2.5.0",
   icon: "💵",
   requiredLevel: 5,
@@ -48,7 +48,7 @@ export async function entry({
   } = userData;
   if (!name) {
     return output.reply(
-      `💌 | Sorry, we do not accept unregistered users, please use the ${prefix}identity-setname command first!`
+      `💌 | Sorry, we do not accept unregistered users, please use the ${prefix}identity-setname command first!`,
     );
   }
   if (!args[0]) {
@@ -58,7 +58,7 @@ export async function entry({
 
   const ads = [
     `🛋️ Feeling broke? You can **loan** up to ${formatCash(
-      1000000
+      1000000,
     )} and use it as an investment for something bigger.`,
     `🌒 Unable to obtain much of shadow coins? **CassExpress** only costs **1/10** of a shadow coin, 1 is **enough** to do **10 transactions!**`,
     `✅ You can actually use **abbreviations** like **10M, 5K, 45B,** or even **all** when performing numerical actions in **CassExpress**, convenient right?`,
@@ -78,8 +78,8 @@ export async function entry({
       const formattedMoney = formatCash(bankData.bank);
       return output.reply(
         `📛 Hello **${name}**, here are your balances.\n\n🏦 Bank: ${formattedMoney}\n🎒 Local: ${formatCash(
-          userMoney
-        )}\n\n${ad}`
+          userMoney,
+        )}\n\n${ad}`,
       );
     },
     async deposit() {
@@ -90,8 +90,8 @@ export async function entry({
       if (isNaN(amount) || amount > userMoney) {
         return output.reply(
           `💵 | Please enter a **valid** amount to deposit, your current balance is ${formatCash(
-            userMoney
-          )}.`
+            userMoney,
+          )}.`,
         );
       }
       if (amount <= 0) {
@@ -109,12 +109,12 @@ export async function entry({
       });
       return output.reply(
         `🏛️ Congratulations **${name}**, the transaction was successful.\n\n💵 Deposited: ${formatCash(
-          amount
+          amount,
         )}\n🎒 Local: ${formatCash(
-          userMoney
+          userMoney,
         )} (-${amount})\n🏛️ Bank: ${formatCash(
-          bankData.bank
-        )} (+${amount})\n\n${ad}`
+          bankData.bank,
+        )} (+${amount})\n\n${ad}`,
       );
     },
 
@@ -126,8 +126,8 @@ export async function entry({
       if (isNaN(amount) || amount > bankData.bank) {
         return output.reply(
           `💵 | Please enter a **valid** amount to withdraw, your current bank balance is ${formatCash(
-            bankData.bank
-          )}.`
+            bankData.bank,
+          )}.`,
         );
       }
       if (amount <= 0) {
@@ -145,12 +145,12 @@ export async function entry({
       });
       return output.reply(
         `🏛️ Congratulations **${name}**, the transaction was successful.\n\n💵 Withdrawn: ${formatCash(
-          amount
+          amount,
         )}\n🎒 Local: ${formatCash(
-          userMoney
+          userMoney,
         )} (+${amount})\n🏛️ Bank: ${formatCash(
-          bankData.bank
-        )} (-${amount})\n\n${ad}`
+          bankData.bank,
+        )} (-${amount})\n\n${ad}`,
       );
     },
     async history() {
@@ -161,7 +161,7 @@ export async function entry({
       return output.reply(
         `📄 Bank History of **${name}**:\n(latest first)\n\n${
           paged.length === 0 ? "This page is empty." : paged.join("\n")
-        }\n\nType **${meta.name} history <page>** to see the next page.`
+        }\n\nType **${meta.name} history <page>** to see the next page.`,
       );
     },
     async interest() {
@@ -180,8 +180,8 @@ export async function entry({
       if (timeDiffInSeconds < cd) {
         return output.reply(
           `💵 | You have already claimed your interest, please wait ${formatTime(
-            (cd - timeDiffInSeconds) * 1000
-          )} before claiming again.`
+            (cd - timeDiffInSeconds) * 1000,
+          )} before claiming again.`,
         );
       }
       const inflationRate = await getInflationRate();
@@ -190,14 +190,14 @@ export async function entry({
         bankData.bank * (originalInterestRate / 365) * timeDiffInSeconds;
       let interestEarned = Math.max(
         0,
-        interestNoInflation - interestNoInflation * (inflationRate / 1000)
+        interestNoInflation - interestNoInflation * (inflationRate / 1000),
       );
       const originalEarn = interestEarned;
       if (interestEarned < 1) {
         return output.reply(
           `🏛️ Failed claiming your interest because the calculated result is ${formatCash(
-            0
-          )}, please come back later!`
+            0,
+          )}, please come back later!`,
         );
       }
       if (interestEarned > cbankStorage) {
@@ -216,14 +216,14 @@ export async function entry({
       });
       return output.reply(
         `🏛️ Congratulations **${name}** for earning interests.\n\n💵 Interest Earned: ${formatCash(
-          interestEarned
+          interestEarned,
         )}/${formatCash(cbankStorage)}\n🏛️ Bank: ${formatCash(
-          bankData.bank
+          bankData.bank,
         )} (+${interestEarned})\n🕜 Time Took: ${formatTime(
-          timeDiffInSeconds * 1000
+          timeDiffInSeconds * 1000,
         )}\n📈 Interest you lost because of inflation: ${formatCash(
-          lostInterest
-        )} \n💵 Inflation Rate: ${inflationRate}\n🗃️ You can upgrade your **storage** in the shop.\n\n${ad}`
+          lostInterest,
+        )} \n💵 Inflation Rate: ${inflationRate}\n🗃️ You can upgrade your **storage** in the shop.\n\n${ad}`,
       );
     },
     async richest() {
@@ -232,7 +232,7 @@ export async function entry({
         .filter(
           (i) =>
             typeof allUsers[i]?.bankData === "object" &&
-            typeof allUsers[i].bankData.bank === "number"
+            typeof allUsers[i].bankData.bank === "number",
         )
         .sort((a, b) => allUsers[b].bankData.bank - allUsers[a].bankData.bank)
         .slice(0, 20);
@@ -267,13 +267,13 @@ export async function entry({
                     `${mails.findIndex((item) => i === item) + 1}. **${
                       i.title
                     }** ${i.isRead ? "✅" : "❌"}\n${CassExpress.formatDate(
-                      i.timeStamp
-                    )}\n${formatTime(Date.now() - i.timeStamp)} ago.`
+                      i.timeStamp,
+                    )}\n${formatTime(Date.now() - i.timeStamp)} ago.`,
                 )
                 .join("\n\n")
         }\n\nUse ${meta.name} **readmail <index>** to read.\nUse ${
           meta.name
-        } **mails <page>** to navigate through pages.\n\n${CassExpress.logo}`
+        } **mails <page>** to navigate through pages.\n\n${CassExpress.logo}`,
       );
     },
     async readmail() {
@@ -281,7 +281,7 @@ export async function entry({
       const num = parseInt(args[1]);
       if (isNaN(num) || num < 1 || num > mails.length) {
         return output.reply(
-          `💌 | Please enter a **valid** mail number. You currently have **${mails.length}** mails.`
+          `💌 | Please enter a **valid** mail number. You currently have **${mails.length}** mails.`,
         );
       }
       const mail = cassExpress.stringMailList().toReversed()[num - 1];
@@ -297,7 +297,7 @@ export async function entry({
       if (!question || question.length <= 10) {
         return output.replyStyled(
           `🏦 | Please enter a question to ask the bank teller that has more than 10 characters.`,
-          style
+          style,
         );
       }
       const askerName = name;
@@ -331,11 +331,11 @@ export async function entry({
         style: "One Time Conversation",
         stockKnowledge: [
           `All Options in Cass Express are: ${Object.keys(handlers).join(
-            ", "
+            ", ",
           )}`,
           `Guides for Users:\n\n${ads.join("\n")}`,
           `The user (${name}) currently have not claimed interest since ${formatTime(
-            Date.now() - (bankData.lastInterestClaimed ?? Date.now())
+            Date.now() - (bankData.lastInterestClaimed ?? Date.now()),
           )}`,
           `The current name of user is "${name}", the user has ${bankData.bank}$ in the Cbank while the user has ${userMoney}$ in their local wallet.`,
         ],
@@ -362,7 +362,7 @@ export async function entry({
   const targetHandler =
     handlers[
       Object.keys(handlers).find(
-        (i) => i === targetArgs || i.toLowerCase() === targetArgs.toLowerCase()
+        (i) => i === targetArgs || i.toLowerCase() === targetArgs.toLowerCase(),
       )
     ];
   if (typeof targetHandler === "function") {
@@ -370,12 +370,12 @@ export async function entry({
   } else {
     return output.reply(
       `${charm} Welcome **${name}** to CassExpress, please use one of our precious services.\n\n${Object.keys(
-        handlers
+        handlers,
       )
         .map((i) => `${circle} ${prefix}${meta.name} **${i}**`)
         .join("\n")}\n\n**Last Interest Claim**: ${formatTime(
-        Date.now() - (bankData.lastInterestClaimed ?? Date.now())
-      )}\n\n${ad}`
+        Date.now() - (bankData.lastInterestClaimed ?? Date.now()),
+      )}\n\n${ad}`,
     );
   }
 }

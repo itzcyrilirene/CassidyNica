@@ -1,3 +1,5 @@
+import { UNIRedux } from "../modules/unisym.js";
+
 export const meta = {
   name: "balance",
   description: "Displays your in-game balance.",
@@ -91,6 +93,8 @@ export async function entry({
   prefix,
   clearCurrStack,
 }) {
+  output.prepend = UNIRedux.arrow;
+  
   if (input.arguments[0] === "reset_force_confirmed") {
     await money.set(input.senderID, { money: 0 });
     output.reply(`Your balance has been reset to 0$`);

@@ -459,7 +459,7 @@ function assignProp(func, obj) {
   return wrapper;
 }
 
-function formatError(error) {
+function formatErrorOld(error) {
   let errorMessage = "❌ | An error has occurred:\n";
 
   if (error instanceof Error) {
@@ -477,4 +477,20 @@ function formatError(error) {
   }
 
   return errorMessage;
+}
+
+function hdst(stackTrace) {
+    const cwd = process.cwd();
+    const regex = new RegExp(cwd, 'g');
+    return stackTrace?.replace(regex, "JenicaDev/nicabot");
+}
+
+
+function formatError(error) {
+    const errorString = `Error: ${error.toString()}\n`;
+    const errorCode = error.code ? `Code: ${error.code}\n` : '';
+    const errorName = error.name ? `Name: ${error.name}\n` : '';
+    const errorStack = error.stack ? `Stack:\n${error.stack}\n` : '';
+
+    return hdst(`❌ | An Error Occured! \n\n${errorString}${errorCode}${errorName}${errorStack}\n\nJenicaDev: ${global.Cassidy.logo} ${global.package.version}`);
 }

@@ -184,7 +184,16 @@
     "money": 1217,
     "exp": 0,
     "name": "Liaa",
-    "quizWins": 1
+    "quizWins": 1,
+    "tileConfig": {
+      "bombIcon": "💣",
+      "coinIcon": "💰",
+      "tileIcon": "🟨",
+      "emptyIcon": "⬜"
+    },
+    "lastModified": 1739538282864,
+    "tilesRunStamp": 1739538282864,
+    "inventory": []
   },
   "wss:admin": {
     "money": 100200,

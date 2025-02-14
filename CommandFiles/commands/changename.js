@@ -1,5 +1,5 @@
 export const meta = {
-  name: "changename",
+  name: "changeuser",
   description: "Changes the user's display name.",
   author: "Liane",
   version: "1.1.1",
@@ -9,6 +9,7 @@ export const meta = {
   noPrefix: false,
   waitingTime: 5,
   linkTo: "identity-setname",
+  otherNames: ["changename"]
 };
 
 export async function entry() {}

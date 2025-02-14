@@ -177,15 +177,10 @@ export async function use(obj) {
         global.Cassidy.config.maintenanceMode &&
         !ADMINBOT.includes(senderID)
       ) {
-        return reply(`🚀 | Maintenance Mode. Only bot admins can use the bot.`);
+        return reply(`❌ | Only bot admins can use the bot right now... Maintenance!`);
       }
-      return output.replyStyled(
-        `🔍 cassidy: ${commandName}: command not found\n\n` +
-          (suggestedCommand
-            ? `Did you mean '**${prefix}${suggestedCommand}**'?\n\n`
-            : "") +
-          `Use '**${prefix}start**' to list available commands and some concept guides.`,
-        { title: global.Cassidy.logo, titleFont: "bold", contentFont: "none" }
+      return output.reply(
+       `❓ | The command "${commandName}" does not exist. Please type "${prefix}help" to see the list of available commands.`
       );
     }
     async function isThreadAdmin(uid) {
@@ -218,23 +213,23 @@ export async function use(obj) {
 
     if (!userDataCache.name && meta.name !== "identity") {
       return output.replyStyled(
-        `🎀 | Welcome! Please register first using the **${prefix}id-setname** command.\n\n***Copy this Example***: ${prefix}id-setname Liane`,
+        `⚠️ | We cannot find your username, please type ${prefix}changeuser < name > to change your username before you can proceed.`,
         { title: global.Cassidy.logo, titleFont: "bold", contentFont: "none" }
       );
     }
 
     const cassEXP = new CassEXP(userDataCache.cassEXP);
 
-    if (typeof meta.requiredLevel === "number") {
-      if (isNaN(meta.requiredLevel)) {
-        return output.wentWrong();
-      }
-      if (!cassEXP.levelReached(meta.requiredLevel)) {
-        return reply(
-          `🧪🔒 | To use this command, you need to be at least level **${meta.requiredLevel}**. You are currently at level **${cassEXP.level}**.`
-        );
-      }
-    }
+    // if (typeof meta.requiredLevel === "number") {
+    //   if (isNaN(meta.requiredLevel)) {
+    //     return output.wentWrong();
+    //   }
+    //   if (!cassEXP.levelReached(meta.requiredLevel)) {
+    //     return reply(
+    //       `🧪🔒 | To use this command, you need to be at least level **${meta.requiredLevel}**. You are currently at level **${cassEXP.level}**.`
+    //     );
+    //   }
+    // }
 
     // if (hasAwaitStack(input.senderID, meta.name)) {
     //   if (isFn(awaiting)) {
@@ -403,7 +398,7 @@ Date: ${new Date(user.banned?.date).toLocaleString()}`);
         if (isFn(noPermission)) {
           return await noPermission(obj);
         }
-        return reply(`❌ | Only bot admins are allowed to use this command.`);
+        return reply(`❌ | The command "${command}" is only exclusive to bot admins.`);
       }
     }
 
@@ -420,7 +415,7 @@ Date: ${new Date(user.banned?.date).toLocaleString()}`);
       return reply(
         `⏱️ | Please wait for ${handleCD.remainingTime(
           cooldownKey
-        )} seconds before using this command again.`
+        )}s before using the command again.`
       );
     }
     obj.recall = recall;
