@@ -36,8 +36,6 @@ export async function entry({ api, input, output, commands, prefix }) {
   const [cmd, cmdName] = body.split(" ");
 
   if (!cmdName) {
-
-
     let helpMessage = `╭─❍「 𝗡𝗶𝗰𝗮𝗕𝗼𝗧 」\n`;
 
     let cmdNum = 1;
@@ -62,6 +60,9 @@ export async function entry({ api, input, output, commands, prefix }) {
       }
 
       const { name, description } = command.meta;
+      if (listedNames.includes(name)) {
+        return;
+      }
       const displayName = Array.isArray(name) ? name[0] : name;
 
       helpMessage += `│ │ ✧ ${fonts(displayName || "No Name", "bold_italic")}${command.meta.noPrefix ? " (no prefix) " : ""} ${command.meta.adminOnly ? "✨" : ""}\n`;

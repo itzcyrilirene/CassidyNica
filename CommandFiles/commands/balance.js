@@ -39,7 +39,10 @@ function formatNumber(number) {
 export const style = {
   title: "💰 Balance",
   titleFont: "bold",
-  contentFont: "fancy",
+  content: {
+    text_font: "fancy",
+    text_prefix: "➤ ",
+  },
 };
 
 function isBrokenMoney(playerMoney) {
@@ -93,8 +96,8 @@ export async function entry({
   prefix,
   clearCurrStack,
 }) {
-  output.prepend = UNIRedux.arrow;
-  
+  // output.prepend = UNIRedux.arrow;
+
   if (input.arguments[0] === "reset_force_confirmed") {
     await money.set(input.senderID, { money: 0 });
     output.reply(`Your balance has been reset to 0$`);
