@@ -191,9 +191,21 @@
       "tileIcon": "🟨",
       "emptyIcon": "⬜"
     },
-    "lastModified": 1739538282864,
+    "lastModified": 1739539533452,
     "tilesRunStamp": 1739538282864,
-    "inventory": []
+    "inventory": [
+      {
+        "name": "Gift",
+        "icon": "🎁",
+        "flavorText": "This is a gift item, this item might grant you something. It's not guaranteed enough, you can use this using inventory command, if you know..",
+        "sellPrice": 100,
+        "type": "treasure",
+        "treasureKey": "generic",
+        "key": "gift",
+        "cannotSend": true
+      }
+    ],
+    "lastGiftClaim": 1739539533452
   },
   "wss:admin": {
     "money": 100200,
@@ -280,6 +292,6 @@
   "test": {
     "money": 0,
     "exp": 0,
-    "lastModified": 1739538134352
+    "lastModified": 1739540100361
   }
 }

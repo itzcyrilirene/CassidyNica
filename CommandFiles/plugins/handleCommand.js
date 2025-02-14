@@ -398,7 +398,7 @@ Date: ${new Date(user.banned?.date).toLocaleString()}`);
         if (isFn(noPermission)) {
           return await noPermission(obj);
         }
-        return reply(`❌ | The command "${command}" is only exclusive to bot admins.`);
+        return reply(`❌ | The command "${commandName}" is only exclusive to bot admins.`);
       }
     }
 
