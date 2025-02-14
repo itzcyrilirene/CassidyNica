@@ -39,5 +39,5 @@
   "exitOnError": false,
   "WEB_PASSWORD": "lialiaXCR",
   "maintenanceMode": false,
-  "noLevelUI": false
+  "noLevelUI": true
 }

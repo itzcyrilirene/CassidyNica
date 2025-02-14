@@ -24,9 +24,10 @@ export function emojiEnd(str) {
     .trim()
     .replaceAll("|", "");
 
-  const res =
-    nonEmojis + " " + UNIRedux.charm + "" + (emojis ? " " + emojis : "");
+  // const res =
+  //   nonEmojis + " " + UNIRedux.charm + "" + (emojis ? " " + emojis : "");
 
+  const res = String((emojis ? emojis : "") + " " + nonEmojis).trim();
   console.log(str, " => ", res);
   return res;
 }
@@ -92,8 +93,10 @@ export class UNIRedux {
   static charm = "✦";
   static disc = "⦿";
 
-  static reduxMark = `🌌 **Cassidy**[font=double_struck]Redux[:font=double_struck] **2.5** ${this.charm}\n[font=fancy_italic]Not React, Just Smart Chat![:font=fancy_italic]`;
-  static redux = `🌌 **Cassidy**[font=double_struck]Redux[:font=double_struck] ${this.charm}`;
+  static arrow = "➤";
+
+  static reduxMark = `✨ 𝙉𝙞𝙘𝙖𝘽𝙤𝙏`;
+  static redux = `✨ 𝙉𝙞𝙘𝙖𝘽𝙤𝙏`;
 }
 
 export const fontMarkups = new Proxy(
@@ -102,7 +105,7 @@ export const fontMarkups = new Proxy(
     get(_, fontName) {
       return (value) => `[font=${fontName}]${value}[:font=${fontName}]`;
     },
-  }
+  },
 );
 
 export function abbreviateNumber(value, places = 2, isFull = false) {
@@ -210,7 +213,7 @@ export class ObjectX {
       Object.entries(obj).map(([key, value]) => [
         key,
         callback(value, key, obj),
-      ])
+      ]),
     );
   }
 
@@ -225,7 +228,7 @@ export class ObjectX {
       Object.entries(obj).map(([key, value]) => [
         callback(key, value, obj),
         value,
-      ])
+      ]),
     );
   }
 
@@ -237,7 +240,7 @@ export class ObjectX {
    */
   static filter(obj, callback) {
     return Object.fromEntries(
-      Object.entries(obj).filter(([key, value]) => callback(value, key, obj))
+      Object.entries(obj).filter(([key, value]) => callback(value, key, obj)),
     );
   }
 
@@ -299,7 +302,7 @@ export class ObjectX {
    */
   static every(obj, callback) {
     return Object.entries(obj).every(([key, value]) =>
-      callback(value, key, obj)
+      callback(value, key, obj),
     );
   }
 
@@ -311,7 +314,7 @@ export class ObjectX {
    */
   static some(obj, callback) {
     return Object.entries(obj).some(([key, value]) =>
-      callback(value, key, obj)
+      callback(value, key, obj),
     );
   }
 
@@ -323,7 +326,7 @@ export class ObjectX {
    */
   static toSorted(obj, compareFn) {
     return Object.fromEntries(
-      Object.entries(obj).sort((a, b) => compareFn(a, b))
+      Object.entries(obj).sort((a, b) => compareFn(a, b)),
     );
   }
 
@@ -599,7 +602,7 @@ export function clamp(min, desired, max) {
   }
   if (min > max) {
     throw new RangeError(
-      "The minimum value cannot be greater than the maximum value."
+      "The minimum value cannot be greater than the maximum value.",
     );
   }
   return Math.min(Math.max(desired, min), max);

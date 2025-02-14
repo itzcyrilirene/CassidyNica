@@ -150,7 +150,7 @@ global.Cassidy = {
   loadCommand,
   loadPlugins,
   loadAllCommands,
-  logo: `🌌 𝗖𝗮𝘀𝘀𝗶𝗱𝘆ℝ𝕖𝕕𝕦𝕩 ✦`,
+  logo: `✨ 𝙉𝙞𝙘𝙖𝘽𝙤𝙏`,
   oldLogo: `🔬 𝗖𝗮𝘀𝘀𝗶𝗱𝘆 𝖠𝗌𝗌𝗂𝗌𝗍𝖺𝗇𝖼𝖾`,
   accessToken: null,
   redux: true,
