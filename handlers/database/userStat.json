@@ -230,7 +230,7 @@
         }
       ]
     },
-    "lastModified": 1738990851436,
+    "lastModified": 1739602675239,
     "inventory": [
       {
         "name": "***DOG*** Canned Food ",
@@ -287,11 +287,17 @@
     },
     "cassEXP": {
       "exp": 5
+    },
+    "ndrive": {
+      "name": "Kiwi Berries",
+      "items": [],
+      "storageRequested": 1e+22,
+      "premium": false
     }
   },
   "test": {
     "money": 0,
     "exp": 0,
-    "lastModified": 1739540476385
+    "lastModified": 1739602640069
   }
 }

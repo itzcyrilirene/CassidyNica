@@ -37,7 +37,7 @@
   "EXTRAPREFIX": ["@"],
   "MODERATORBOT": ["wss:moderator"],
   "exitOnError": false,
-  "WEB_PASSWORD": "lialiaXCR",
+  "WEB_PASSWORD": "nicapanel",
   "maintenanceMode": false,
   "noLevelUI": true
 }
