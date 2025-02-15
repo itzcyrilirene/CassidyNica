@@ -224,23 +224,24 @@ export async function entry({
 
         if (keysToStore.length < 1) {
           return output.reply(
-            `❌ Please specify an item key to store in the NicaDrive\n\n${await createItemMenu()}`,
+            `❌ Please specify an item key to store in the NicaDrive.`,
           );
         }
         let str = ``;
         for (const keyToStore of keysToStore) {
           const itemToStore = userInventory.getOne(keyToStore);
           if (!itemToStore) {
-            str += `❌ Item with key "${keyToStore}" not found in your inventory.\n`;
-            continue;
+            return output.reply(
+              `❌ Item with key "${keyToStore}" not found in your inventory.`,
+            );
           }
-          if (nicaItems.getAll().length >= ndriveLimit) {
-            str += `❌ NicaDrive is full.\n`;
-            continue;
+          if (nicaItems.getAll().length >= limit) {
+            return output.reply(`❌ NicaDrive is full.`);
           }
           if (itemToStore.cannotvault === true) {
-            str += `❌ Item with key "${keyToStore}" cannot be stored in the NicaDrive.\n`;
-            continue;
+            return output.reply(
+              `❌ Item with key "${keyToStore}" cannot be stored in the NicaDrive.`,
+            );
           }
           userInventory.deleteOne(keyToStore);
           nicaItems.addOne(itemToStore);
@@ -264,19 +265,19 @@ export async function entry({
         const keysToRetrieve = subArgs;
         if (keysToRetrieve.length < 1) {
           return output.reply(
-            `❌ Please specify an item key to retrieve from the NicaDrive.\n\n${await createItemMenu()}`,
+            `❌ Please specify an item key to retrieve from the NicaDrive.`,
           );
         }
         let str2 = ``;
         for (const keyToRetrieve of keysToRetrieve) {
           const itemToRetrieve = nicaItems.getOne(keyToRetrieve);
           if (!itemToRetrieve) {
-            str2 += `❌ Item with key "${keyToRetrieve}" not found in the NicaDrive.\n`;
-            continue;
+            return output.reply(
+              `❌ Item with key "${keyToRetrieve}" not found in the NicaDrive.`,
+            );
           }
           if (userInventory.getAll().length >= invLimit) {
-            str2 += `❌ Your Inventory is full.\n`;
-            continue;
+            return output.reply(`❌ Your Inventory is full.`);
           }
           nicaItems.deleteOne(keyToRetrieve);
           userInventory.addOne(itemToRetrieve);

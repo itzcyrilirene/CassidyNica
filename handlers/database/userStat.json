@@ -230,41 +230,9 @@
         }
       ]
     },
-    "lastModified": 1739604880273,
-    "inventory": [
-      {
-        "name": "***DOG*** Canned Food ",
-        "icon": "🥫",
-        "flavorText": "This is a canned food item, it's not very edible but it's a good product.",
-        "sellPrice": 100,
-        "type": "dog_food",
-        "saturation": 1740000,
-        "key": "dogCan",
-        "prob": 0.68,
-        "group": [
-          "generic",
-          "unlucky",
-          "curse"
-        ],
-        "isTrash": true,
-        "isGift": true,
-        "index": 0,
-        "cannotToss": false
-      },
-      {
-        "name": "Gift",
-        "icon": "🎁",
-        "flavorText": "This is a gift item, this item might grant you something. It's not guaranteed enough, you can use this using inventory command, if you know..",
-        "sellPrice": 100,
-        "type": "treasure",
-        "treasureKey": "generic",
-        "key": "gift",
-        "cannotSend": true,
-        "index": 0,
-        "cannotToss": false
-      }
-    ],
-    "lastGiftClaim": 1739604144051,
+    "lastModified": 1739605274458,
+    "inventory": [],
+    "lastGiftClaim": 1739605261527,
     "fishStamp": 1735977461906,
     "collectibles": [
       {
@@ -304,7 +272,63 @@
     },
     "ndrive": {
       "name": "Kiwi Berries",
-      "items": [],
+      "items": [
+        {
+          "name": "Gift",
+          "icon": "🎁",
+          "flavorText": "This is a gift item, this item might grant you something. It's not guaranteed enough, you can use this using inventory command, if you know..",
+          "sellPrice": 100,
+          "type": "treasure",
+          "treasureKey": "generic",
+          "key": "gift",
+          "cannotSend": true,
+          "index": 1,
+          "cannotToss": false
+        },
+        {
+          "name": "Gift",
+          "icon": "🎁",
+          "flavorText": "This is a gift item, this item might grant you something. It's not guaranteed enough, you can use this using inventory command, if you know..",
+          "sellPrice": 100,
+          "type": "treasure",
+          "treasureKey": "generic",
+          "key": "gift",
+          "cannotSend": true,
+          "index": 2,
+          "cannotToss": false
+        },
+        {
+          "name": "Gift",
+          "icon": "🎁",
+          "flavorText": "This is a gift item, this item might grant you something. It's not guaranteed enough, you can use this using inventory command, if you know..",
+          "sellPrice": 100,
+          "type": "treasure",
+          "treasureKey": "generic",
+          "key": "gift",
+          "cannotSend": true,
+          "index": 3,
+          "cannotToss": false
+        },
+        {
+          "name": "***DOG*** Canned Food ",
+          "icon": "🥫",
+          "flavorText": "This is a canned food item, it's not very edible but it's a good product.",
+          "sellPrice": 100,
+          "type": "dog_food",
+          "saturation": 1740000,
+          "key": "dogCan",
+          "prob": 0.68,
+          "group": [
+            "generic",
+            "unlucky",
+            "curse"
+          ],
+          "isTrash": true,
+          "isGift": true,
+          "index": 0,
+          "cannotToss": false
+        }
+      ],
       "storageRequested": 1e+22,
       "premium": false
     }
