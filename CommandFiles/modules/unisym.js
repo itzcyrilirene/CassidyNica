@@ -94,7 +94,11 @@ export class UNIRedux {
   static disc = "⦿";
 
   static arrow = "➤";
-
+  static arrowBW = "➣";
+  static arrowFromT = "➥";
+  static arrowFromB = "➦";
+  static restart = "⟳";
+  static arrowOutline = "➩";
   static reduxMark = `✨ 𝙉𝙞𝙘𝙖𝘽𝙤𝙏`;
   static redux = `✨ 𝙉𝙞𝙘𝙖𝘽𝙤𝙏`;
 }
