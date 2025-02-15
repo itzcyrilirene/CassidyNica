@@ -211,7 +211,7 @@ export async function use(obj) {
     obj.userDataCache = userDataCache;
     obj.shopCache = shop;
 
-    if (!userDataCache.name && meta.name !== "identity") {
+    if (!userDataCache.name && meta.name !== "changeuser" && meta.name !== "identity") {
       return output.replyStyled(
         `⚠️ | We cannot find your username, please type ${prefix}changeuser < name > to change your username before you can proceed.`,
         { title: global.Cassidy.logo, titleFont: "bold", contentFont: "none" }
