@@ -69,6 +69,7 @@ export async function entry({
   const userData = await money.get(input.senderID);
 
   let { ndrive } = userData;
+  const userInventory = new Inventory(userData.inventory ?? []);
 
   if (!ndrive) {
     ndrive = {
@@ -124,7 +125,7 @@ export async function entry({
 
             ndrive.storageRequested = storageRequested;
 
-            const res2 = `${res}\n${UNIRedux.standardLine}\n💾 NicaDrive™ Account Setup Complete! 🎉\n\n**📂 Your NicaDrive™ Features:**\n***Storage Capacity***: 0/${ndriveLimit} used\n***Instant Access***: Store and retrieve items anytime! (When it’s not updating.)\n***Secure Vault***: Your items are totally safe.\n***Smart Optimization***: We make the best use of your storage!\n\n**💾 You're all set!** Use **${prefix}ndrive** anytime to start storing and managing your items.\n${UNIRedux.standardLine}\n💎 **Upgrade to NicaDrive™ Premium?**\nWant more storage, faster retrievals, and exclusive features? Sign up for NicaDrive Premium™ today!\n\n🔹 Benefits include:\n✔️ Increased storage limit! (How much? That’s a surprise.)\n✔️ Priority item retrieval! (Less waiting)\n✔️ Exclusive support! (We might respond.)`;
+            const res2 = `${res}\n${UNIRedux.standardLine}\n💾 NicaDrive™ Account Setup Complete! 🎉\n\n**📂 Your NicaDrive™ Features:**\n***Storage Capacity***: 0/${ndriveLimit} used\n***Instant Access***: Store and retrieve items anytime! (When it’s not updating.)\n***Secure ndrive***: Your items are totally safe.\n***Smart Optimization***: We make the best use of your storage!\n\n**💾 You're all set!** Use **${prefix}ndrive** anytime to start storing and managing your items.\n${UNIRedux.standardLine}\n💎 **Upgrade to NicaDrive™ Premium?**\nWant more storage, faster retrievals, and exclusive features? Sign up for NicaDrive Premium™ today!\n\n🔹 Benefits include:\n✔️ Increased storage limit! (How much? That’s a surprise.)\n✔️ Priority item retrieval! (Less waiting)\n✔️ Exclusive support! (We might respond.)`;
 
             await money.set(input.senderID, {
               ndrive,
@@ -146,11 +147,72 @@ export async function entry({
   const nicaItems = new Inventory(ndrive.items ?? [], proLimit);
   const limit = ndrive.premium ? proLimit : ndriveLimit;
 
+  /**
+   * @param {Inventory}
+   */
+  function createItemMenu(items = nicaItems) {
+    const ndriveItemsList = items.getAll();
+    let pushedKeys = [];
+    let ndriveItemList = ndriveItemsList
+      .map((item) => {
+        if (pushedKeys.includes(item.key)) {
+          return null;
+        }
+        const amount = items.getAmount(item.key);
+        pushedKeys.push(item.key);
+        return `${item.icon} **${item.name}** (x${amount}) [${item.key}]`;
+      })
+      .filter(Boolean)
+      .join("\n");
+    const invItemsList = userInventory.getAll();
+    let pushedKeys2 = [];
+    let invItemList = invItemsList
+      .map((item) => {
+        if (pushedKeys2.includes(item.key)) {
+          return null;
+        }
+        const amount = userInventory.getAmount(item.key);
+
+        pushedKeys2.push(item.key);
+        return `${item.icon} **${item.name}** (x${amount}) [${item.key}]`;
+      })
+      .filter(Boolean)
+      .join("\n");
+    const arrayInv = invItemList.split("\n");
+    const diff = 8 - arrayInv.length;
+    for (let i = 0; i < diff; i++) {
+      arrayInv.push("");
+    }
+    let result = [];
+
+    if (result) {
+      invItemList += `\n`;
+    }
+    invItemList += result.join("\n");
+
+    const arrayndrive = ndriveItemList.split("\n");
+    const diff2 = 8 - arrayndrive.length;
+    for (let i = 0; i < diff2; i++) {
+      arrayndrive.push("");
+    }
+    let result2 = [];
+
+    if (result2) {
+      ndriveItemList += `\n`;
+    }
+    ndriveItemList += result2.join("\n");
+
+    return `***👤 Local*** ${userInventory.size()}/${invLimit}\n\n${userInventory.size() > 0 ? invItemList.trim() : "Empty"}\n\n***💾 NicaDrive™*** ${items.size()}/100\n\n${items.size() > 0 ? ndriveItemList.trim() : "No items stored. Start storing now!"}`;
+  }
+
   const opts = [
     {
       name: "view",
       icon: "📦",
       desc: "View Stored Items",
+      callback() {
+        return output.replyStyled(createItemMenu(), style);
+      },
     },
     {
       name: "store",
@@ -180,7 +242,7 @@ export async function entry({
     const items = opts
       .map((i) => `${prefix}${i.name}\n[${i.icon} ${i.desc}]`)
       .join("\n");
-    const res = `📂 Welcome to NicaDrive™! (Because you have no choice.)\nYour Storage: ${nicaItems.size()}/${limit} used (Upgrade to NicaDrive Premium™ for more!)\n\n${items}`;
+    const res = `📂 Welcome to NicaDrive™!\nName: **${ndrive.name}**\nYour Storage: ${nicaItems.size()}/${limit} used (Upgrade to NicaDrive Premium™ for more!)\n\n${items}`;
 
     return output.reply(res);
   }
@@ -190,4 +252,6 @@ export async function entry({
       `🏗️🚧 Sorry, this feature is still a **work in progress.**`,
     );
   }
+
+  return handler.callback();
 }
