@@ -63,7 +63,8 @@ export async function entry({
   money,
   args,
 }) {
-  const [sub, ...subArgs] = args;
+  let [sub, ...subArgs] = args;
+  subArgs = normalizeArgAmount(subArgs);
 
   const subArgsStr = subArgs.join(" ");
   const userData = await money.get(input.senderID);
@@ -88,7 +89,7 @@ export async function entry({
        * @param {CommandContext} repCtx
        */
       async callback(repCtx) {
-        const name = repCtx.input.body;
+        const name = repCtx.input.body.split(" ")[0].slice(0, 20);
 
         if (!name) {
           return;
@@ -103,7 +104,7 @@ export async function entry({
           style,
         );
 
-        ndrive.name = name;
+        ndrive.name = name.replace(/\b\w/g, (char) => char.toUpperCase());
 
         input.setReply(ii2.messageID, {
           async callback(repCtx2) {
@@ -150,7 +151,7 @@ export async function entry({
   /**
    * @param {Inventory}
    */
-  function createItemMenu(items = nicaItems) {
+  async function createItemMenu(items = nicaItems) {
     const ndriveItemsList = items.getAll();
     let pushedKeys = [];
     let ndriveItemList = ndriveItemsList
@@ -202,7 +203,7 @@ export async function entry({
     }
     ndriveItemList += result2.join("\n");
 
-    return `***👤 Local*** ${userInventory.size()}/${invLimit}\n\n${userInventory.size() > 0 ? invItemList.trim() : "Empty"}\n\n***💾 NicaDrive™*** ${items.size()}/100\n\n${items.size() > 0 ? ndriveItemList.trim() : "No items stored. Start storing now!"}`;
+    return `***👤 ${ndrive.name}*** ${userInventory.size()}/${invLimit}\n\n${userInventory.size() > 0 ? invItemList.trim() : "Empty"}\n\n***💾 NicaDrive™*** ${items.size()}/100\n\n${items.size() > 0 ? ndriveItemList.trim() : "No items stored. Start storing now!"}`;
   }
 
   const opts = [
@@ -210,19 +211,86 @@ export async function entry({
       name: "view",
       icon: "📦",
       desc: "View Stored Items",
-      callback() {
-        return output.replyStyled(createItemMenu(), style);
+      async callback() {
+        return output.replyStyled(await createItemMenu(), style);
       },
     },
     {
       name: "store",
       icon: "📥",
       desc: "Store Item(s)",
+      async callback() {
+        const keysToStore = subArgs;
+
+        if (keysToStore.length < 1) {
+          return output.reply(
+            `❌ Please specify an item key to store in the NicaDrive\n\n${await createItemMenu()}`,
+          );
+        }
+        let str = ``;
+        for (const keyToStore of keysToStore) {
+          const itemToStore = userInventory.getOne(keyToStore);
+          if (!itemToStore) {
+            str += `❌ Item with key "${keyToStore}" not found in your inventory.\n`;
+            continue;
+          }
+          if (nicaItems.getAll().length >= ndriveLimit) {
+            str += `❌ NicaDrive is full.\n`;
+            continue;
+          }
+          if (itemToStore.cannotvault === true) {
+            str += `❌ Item with key "${keyToStore}" cannot be stored in the NicaDrive.\n`;
+            continue;
+          }
+          userInventory.deleteOne(keyToStore);
+          nicaItems.addOne(itemToStore);
+
+          str += `✅ ${itemToStore.icon} ${itemToStore.name}\n`;
+        }
+        ndrive.items = nicaItems.getAll();
+        await money.set(input.senderID, {
+          inventory: Array.from(userInventory),
+          ndrive,
+        });
+
+        return output.reply(`${str.trim()}\n\n${await createItemMenu()}`);
+      },
     },
     {
       name: "retrieve",
       icon: "📤",
       desc: "Retrieve Item(s)",
+      async callback() {
+        const keysToRetrieve = subArgs;
+        if (keysToRetrieve.length < 1) {
+          return output.reply(
+            `❌ Please specify an item key to retrieve from the NicaDrive.\n\n${await createItemMenu()}`,
+          );
+        }
+        let str2 = ``;
+        for (const keyToRetrieve of keysToRetrieve) {
+          const itemToRetrieve = nicaItems.getOne(keyToRetrieve);
+          if (!itemToRetrieve) {
+            str2 += `❌ Item with key "${keyToRetrieve}" not found in the NicaDrive.\n`;
+            continue;
+          }
+          if (userInventory.getAll().length >= invLimit) {
+            str2 += `❌ Your Inventory is full.\n`;
+            continue;
+          }
+          nicaItems.deleteOne(keyToRetrieve);
+          userInventory.addOne(itemToRetrieve);
+          str2 += `✅ ${itemToRetrieve.icon} ${itemToRetrieve.name}\n`;
+        }
+        ndrive.items = nicaItems.getAll();
+
+        await money.set(input.senderID, {
+          ndrive,
+          inventory: Array.from(userInventory),
+        });
+
+        return output.reply(`${str2.trim()}\n\n${await createItemMenu()}`);
+      },
     },
     {
       name: "upgrade",

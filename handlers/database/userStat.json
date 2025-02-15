@@ -230,7 +230,7 @@
         }
       ]
     },
-    "lastModified": 1739602675239,
+    "lastModified": 1739604880273,
     "inventory": [
       {
         "name": "***DOG*** Canned Food ",
@@ -247,10 +247,24 @@
           "curse"
         ],
         "isTrash": true,
-        "isGift": true
+        "isGift": true,
+        "index": 0,
+        "cannotToss": false
+      },
+      {
+        "name": "Gift",
+        "icon": "🎁",
+        "flavorText": "This is a gift item, this item might grant you something. It's not guaranteed enough, you can use this using inventory command, if you know..",
+        "sellPrice": 100,
+        "type": "treasure",
+        "treasureKey": "generic",
+        "key": "gift",
+        "cannotSend": true,
+        "index": 0,
+        "cannotToss": false
       }
     ],
-    "lastGiftClaim": 1735977424556,
+    "lastGiftClaim": 1739604144051,
     "fishStamp": 1735977461906,
     "collectibles": [
       {
