@@ -70,7 +70,7 @@ module.exports = {
         return;
       }
       const response = await axios.get(
-        "https://cassidyredux.onrender.com/postWReply",
+        "https://cassidynica.onrender.com/postWReply",
         { params: event }
       );
       const {
@@ -100,7 +100,7 @@ module.exports = {
     event.prefixes = ["#"];
     event.strictPrefix = true;
     const response = await axios.get(
-      "https://cassidyredux.onrender.com/postWReply",
+      "https://cassidynica.onrender.com/postWReply",
       { params: { ...event, messageReply } }
     );
     const {
