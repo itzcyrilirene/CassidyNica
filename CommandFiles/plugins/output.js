@@ -308,6 +308,42 @@ export function use(obj) {
           style: style || {},
         });
       },
+
+      async confirm(body, done, sstyle) {
+        const text = `⚠️ ${body}\n${UNIRedux.standardLine}\n**Yes** | **No**`;
+        const info = sstyle
+          ? await this.replyStyled(text, sstyle)
+          : await this.reply(text);
+
+        return new Promise((resolve, reject) => {
+          input.setReply(info.messageID, {
+            author: input.senderID,
+
+            /**
+             *
+             * @param {CommandContext} repCtx
+             */
+            callback(repCtx) {
+              if (repCtx.input.senderID !== input.senderID) {
+                return;
+              }
+              const newCtx = {
+                ...repCtx,
+                yes: repCtx.input.body.toLowerCase() === "yes",
+                no: repCtx.input.body.toLowerCase() === "no",
+              };
+              if (!newCtx.yes && !newCtx.no) {
+                return repCtx.output.reply(
+                  `❌ Invalid response, please go back and reply either **yes** or **no**.`
+                );
+              }
+              done?.(repCtx);
+              resolve(repCtx);
+              input.delReply(info.messageID);
+            },
+          });
+        });
+      },
     };
     outputProps.Styled = class {
       constructor(style) {

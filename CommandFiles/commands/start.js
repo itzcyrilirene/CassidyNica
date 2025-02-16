@@ -123,9 +123,10 @@ export async function entry({
   const pageCategories = sortedCategories.slice(startIndex, endIndex);
 
   let result = `**Page ${currentPage} of ${totalPages}** 📄\n`;
+  let preff = "│ ";
 
   pageCategories.forEach((category, index) => {
-    result += `\n**${category}** 📁\n`;
+    result += `\n╭─────────────❍\n${preff}**${category}** 📁\n${preff}\n`;
     categorizedCommands[category].forEach((command) => {
       const {
         name,
@@ -141,7 +142,7 @@ export async function entry({
         : shop.canPurchase(name, userData.money)
         ? "🔐"
         : "🔒";
-      result += `  ${statusIcon} ${prefix}**${toTitleCase(name)}**${
+      result += `${preff}  ${statusIcon} ${prefix}**${toTitleCase(name)}**${
         shopPrice
           ? ` - $**${shopPrice}** ${
               shop.canPurchase(name, userData.money)
@@ -151,12 +152,17 @@ export async function entry({
                 : "❌"
             }`
           : ""
-      } ${UNIRedux.charm}\n    ${UNIRedux.charm} ${fontMarkups.fancy_italic(
+      } ${UNIRedux.charm}\n${preff}    ${
+        UNIRedux.charm
+      } ${fontMarkups.fancy_italic(
         "Description"
-      )}: ${description} 💬\n    ${UNIRedux.charm} ${fontMarkups.fancy_italic(
-        "Aliases"
-      )}: ${otherNames?.join(", ") || "None 📝"}\n\n`;
+      )}: ${description} 💬\n${preff}   ${
+        UNIRedux.charm
+      } ${fontMarkups.fancy_italic("Aliases")}: ${
+        otherNames?.join(", ") || "None 📝"
+      }\n${preff}\n`;
     });
+    result += `╰─────────────❍\n\n`;
   });
 
   result += `\n\n» Theres **MORE** commands! To navigate pages, type **${prefix}start <page_number>**.\n`;

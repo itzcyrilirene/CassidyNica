@@ -675,8 +675,16 @@ export async function use(obj) {
      */
     async simulateAction(context = obj) {
       try {
-        const { input, output, money, args, prefix, CassExpress, Inventory } =
-          context;
+        const {
+          input,
+          output,
+          money,
+          args,
+          prefix,
+          CassExpress,
+          Inventory,
+          commandName,
+        } = context;
         const self = this;
         const home = new ReduxCMDHome({ isHypen: true }, [
           {
@@ -720,17 +728,240 @@ export async function use(obj) {
             },
           },
           {
+            key: "check",
+            description:
+              "Checks the progress of your tuned items and their remaining collection time.",
+            async handler() {
+              const {
+                money: userMoney,
+                [self.key + "Stamp"]: actionStamp,
+                [self.key + "MaxZ"]: actionMax = self.storage,
+                [self.key + "Total"]: totalItems = {},
+                [self.key + "Tune"]: actionTune = [],
+                cassEXP: cxp,
+                name,
+              } = await money.get(input.senderID);
+
+              function formatDuration(ms) {
+                const seconds = Math.floor(ms / 1000) % 60;
+                const minutes = Math.floor(ms / (1000 * 60)) % 60;
+                const hours = Math.floor(ms / (1000 * 60 * 60)) % 24;
+                const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+
+                const parts = [];
+                if (days > 0) parts.push(`${days} day${days > 1 ? "s" : ""}`);
+                if (hours > 0)
+                  parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
+                if (minutes > 0)
+                  parts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
+                if (seconds > 0)
+                  parts.push(`${seconds} second${seconds > 1 ? "s" : ""}`);
+
+                return parts.length > 1
+                  ? parts.slice(0, -1).join(", ") + " and " + parts.slice(-1)
+                  : parts[0] || "0 seconds";
+              }
+
+              const mapped = actionTune.map((itemName, ind) => {
+                const data = self.itemData.find(
+                  (item) => item.name === itemName
+                );
+                return `**${ind + 1}**. ${data.icon} **${itemName}**\nRarity: ${
+                  100 - data.chance * 100
+                }%\nProcessing Time: ${
+                  data.delay
+                } minutes.\nPrice Range:\nBetween ${data.priceA} and ${
+                  data.priceB
+                }.`;
+              });
+
+              const timeElapsed = actionStamp
+                ? formatDuration(Date.now() - actionStamp)
+                : "❌ Not yet tuned.";
+
+              return output.reply(
+                `🗃️ **Max Storage**:\n${Number(
+                  actionMax
+                ).toLocaleString()}\n\n⌛ **Time Since Tuning**:\n${timeElapsed}\n\n🚀 **Tuned Items:**\n\n${
+                  mapped.length > 0 ? mapped.join("\n\n") : "[ No Tuned Items ]"
+                }\n\nUse +${commandName}-collect to claim your yield or profit at the right time.\n⚠️ Collecting too early will **reduce your earnings** and **require retuning**, while collecting too late may cause **storage overflow**, leading to lost profits.`
+              );
+            },
+          },
+          {
+            key: "tune",
+            description:
+              "Tune at least 3 items before collecting—your choices shape the outcome, but you can't repeat the same order!",
+            aliases: ["-tu"],
+            async handler() {
+              const {
+                money: userMoney,
+                [self.key + "Stamp"]: actionStamp,
+                [self.key + "MaxZ"]: actionMax = self.storage,
+                [self.key + "Total"]: totalItems = {},
+                [self.key + "Tune"]: actionTune = [],
+                cassEXP: cxp,
+                name,
+              } = await money.get(input.senderID);
+
+              let sortedItems = Object.entries(totalItems).sort(
+                () => Math.random() - 0.5
+              );
+              self.itemData.forEach((i) => {
+                const total = Object.keys(totalItems).find((j) => j === i.name);
+
+                if (!total) {
+                  sortedItems.unshift([i.name, 0]);
+                }
+              });
+              sortedItems = sortedItems.slice(0, 5);
+
+              const genR = () => Math.floor(Math.random() * 5) + 1;
+              // const genR = () =>
+              //   Math.floor(
+              //     Math.random() * (Object.entries(totalItems).length - 1 + 1)
+              //   ) + 1;
+
+              let warn = actionStamp
+                ? `⚠️ **You have already tuned your items!**\n\nTuning again will **reset the timer** and you may **lose your opportunity to collect.**\n\n`
+                : "";
+
+              let result = `${warn}🚀 Choose at least **3 items** to tune. Reply with the corresponding **numbers**.\n\n***Example***: ${genR()} ${genR()} ${genR()}\n\n`;
+
+              sortedItems.forEach(([itemName, itemCount], ind) => {
+                const data = self.itemData.find(
+                  (item) => item.name === itemName
+                );
+                result += `**${ind + 1}**. ${
+                  data.icon
+                } **${itemName}**\nSold Amount: ${itemCount}\nRarity: ${
+                  100 - data.chance * 100
+                }%\nProcessing Time: ${
+                  data.delay
+                } minutes.\nPrice Range:\nBetween ${data.priceA} and ${
+                  data.priceB
+                }.\n\n`;
+              });
+
+              const style = {
+                title: "🚀 Item Tuner",
+                titleFont: "bold",
+                contentFont: "fancy",
+              };
+
+              const inf = await output.replyStyled(result, style);
+
+              input.setReply(inf.messageID, {
+                /**
+                 *
+                 * @param {CommandContext} ctx2
+                 */
+                async callback(ctx2) {
+                  if (ctx2.input.senderID !== input.senderID) {
+                    return;
+                  }
+                  const nums = ctx2.input.words
+                    .map((i) => parseInt(i))
+                    .map((i) => sortedItems.at(i - 1))
+                    .map((i) => i?.[0])
+                    .slice(0, 3);
+
+                  if (nums.length < 3) {
+                    return ctx2.output.replyStyled(
+                      `❌ You need to provide at least three numbers! You provided only ${nums.length}.`,
+                      style
+                    );
+                  }
+                  if (nums.length > 3) {
+                    return ctx2.output.replyStyled(
+                      `❌ You only need to provide three numbers! You provided too much.`,
+                      style
+                    );
+                  }
+
+                  const invalidNums = nums.filter(
+                    (i) => i === null || i === undefined
+                  );
+
+                  if (invalidNums.length > 0) {
+                    return ctx2.output.replyStyled(
+                      `❌ Invalid input detected! The following values are missing: ${invalidNums.join(
+                        ", "
+                      )}.`,
+                      style
+                    );
+                  }
+                  const uniqueNums = new Set(nums);
+                  if (uniqueNums.size !== nums.length) {
+                    return ctx2.output.replyStyled(
+                      `❌ Duplicate numbers are not allowed! Your input contains duplicates.`,
+                      style
+                    );
+                  }
+
+                  await money.set(ctx2.input.senderID, {
+                    [self.key + "Tune"]: nums,
+                    [self.key + "Stamp"]: Date.now(),
+                  });
+
+                  let r2 = "";
+
+                  nums.forEach((itemName) => {
+                    const ind = sortedItems.findIndex((i) => i[0] === itemName);
+                    const data = self.itemData.find(
+                      (item) => item.name === itemName
+                    );
+                    r2 += `**${ind + 1}**. ${
+                      data.icon
+                    } **${itemName}**\nRarity: ${
+                      100 - data.chance * 100
+                    }%\nProcessing Time: ${
+                      data.delay
+                    } minutes.\nPrice Range:\nBetween ${data.priceA} and ${
+                      data.priceB
+                    }.\n\n`;
+                  });
+
+                  return output.replyStyled(
+                    `✅ Tuning successful!\nPlease wait patiently to **collect** your items.\n\nThe following **3 items** will be **prioritized**:\n\n${r2}\n\n⚠️ **Warning:** Tuning **resets the waiting time** for all items.\nAvoid tuning while having many items waiting, or you may lose the opportunity to collect them.`.trim(),
+                    style
+                  );
+                },
+              });
+            },
+          },
+          {
             key: "collect",
             description: "Collect items that have finished processing.",
             aliases: ["-c"],
             async handler() {
               const currentTimestamp = Date.now();
+              function formatDuration(ms) {
+                const seconds = Math.floor(ms / 1000) % 60;
+                const minutes = Math.floor(ms / (1000 * 60)) % 60;
+                const hours = Math.floor(ms / (1000 * 60 * 60)) % 24;
+                const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+
+                const parts = [];
+                if (days > 0) parts.push(`${days} day${days > 1 ? "s" : ""}`);
+                if (hours > 0)
+                  parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
+                if (minutes > 0)
+                  parts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
+                if (seconds > 0)
+                  parts.push(`${seconds} second${seconds > 1 ? "s" : ""}`);
+
+                return parts.length > 1
+                  ? parts.slice(0, -1).join(", ") + " and " + parts.slice(-1)
+                  : parts[0] || "0 seconds";
+              }
 
               const {
                 money: userMoney,
                 [self.key + "Stamp"]: actionStamp,
                 [self.key + "MaxZ"]: actionMax = self.storage,
                 [self.key + "Total"]: totalItems = {},
+                [self.key + "Tune"]: actionTune = [],
                 cassEXP: cxp,
                 name,
               } = await money.get(input.senderID);
@@ -741,19 +972,39 @@ export async function use(obj) {
                 );
               }
 
+              const randTune = () =>
+                self.itemData.map((i) => i.name)[
+                  Math.floor(Math.random() * self.itemData.length)
+                ];
+
+              while (actionTune.length < 3) {
+                actionTune.push(randTune());
+              }
+
+              const tuneBasedData = [...self.itemData].sort((a, b) => {
+                const indexA = actionTune.indexOf(a.name);
+                const indexB = actionTune.indexOf(b.name);
+
+                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                if (indexA !== -1) return -1;
+                if (indexB !== -1) return 1;
+
+                return Math.random() - 0.5;
+              });
+
               let text = "";
               let newMoney = userMoney;
               let totalYield = 0;
               let failYield = 0;
 
               if (!actionStamp) {
-                text = `${self.actionEmoji} Cannot perform ${self.verbing} action since no ${self.verb} is in progress. Starting ${self.verbing} ${self.verb} now, come back later!`;
+                text = `${self.actionEmoji} Cannot perform ${self.verbing} action since no items have been tuned yet. Use the **${prefix}${commandName}-tune** command to set your priorities before collecting!`;
               } else {
                 const elapsedTime =
                   (currentTimestamp - actionStamp) / 1000 / 60;
 
                 let harvestedItems = [];
-                for (const item of self.itemData) {
+                for (const item of tuneBasedData) {
                   let yieldAmount = Math.max(
                     0,
                     Math.floor(elapsedTime / item.delay)
@@ -806,7 +1057,18 @@ export async function use(obj) {
                   if (item.yieldAmount < 1) {
                     return;
                   }
-                  text += `${self.checkIcon} ${item.icon} **x${item.yieldAmount}** **${item.name}(s)** sold for **${item.price}$** each, total: **${item.total}$**\n`;
+                  const tunedOrder = actionTune.indexOf(item.name);
+                  text += `${
+                    tunedOrder !== -1
+                      ? `🚀**#${tunedOrder + 1}**`
+                      : self.checkIcon
+                  } ${item.icon} ${
+                    tunedOrder !== -1
+                      ? `**x${item.yieldAmount}** **${item.name}(s)**`
+                      : `x${item.yieldAmount} ${item.name}(s)`
+                  } sold for **${item.price}$** each, total: **${
+                    item.total
+                  }$**\n`;
                   types++;
                 });
                 if (failYield > 0) {
@@ -831,19 +1093,20 @@ export async function use(obj) {
                 text += `\n\n✨ **Total Earnings**: $**${(
                   newMoney - userMoney
                 ).toLocaleString()}💵**\n💰 **Your Balance**: $**${newMoney.toLocaleString()}**💵`;
-                text += `\n\n${self.actionEmoji} Starting another ${
+                text += `\n⌛ **Time Took**: ${formatDuration(
+                  currentTimestamp - actionStamp
+                )}\n\n${self.actionEmoji} To start another ${
                   self.verbing
-                } cycle, please come back after ${Math.floor(
-                  (currentTimestamp - actionStamp) / 1000 / 60
-                )} minutes if you want to get the same amount of earnings.`;
+                } cycle, use the **${prefix}${commandName}-tune** command to set your priorities before collecting.`;
                 // text += `\n\n`;
               }
 
               await money.set(input.senderID, {
                 money: newMoney,
-                [self.key + "Stamp"]: currentTimestamp,
+                [self.key + "Stamp"]: null,
                 [self.key + "MaxZ"]: actionMax,
                 [self.key + "Total"]: totalItems,
+                [self.key + "Tune"]: [],
                 cassEXP: cassEXP.raw(),
               });
 

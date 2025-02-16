@@ -211,7 +211,12 @@ export async function use(obj) {
     obj.userDataCache = userDataCache;
     obj.shopCache = shop;
 
-    if (!userDataCache.name && meta.name !== "changeuser" && meta.name !== "identity") {
+
+    if (!userDataCache.name && meta.name !== "identity") {
+      if (!hasPrefix) {
+        return;
+      }
+
       return output.replyStyled(
         `⚠️ | We cannot find your username, please type ${prefix}changeuser < name > to change your username before you can proceed.`,
         { title: global.Cassidy.logo, titleFont: "bold", contentFont: "none" }
@@ -223,6 +228,9 @@ export async function use(obj) {
     // if (typeof meta.requiredLevel === "number") {
     //   if (isNaN(meta.requiredLevel)) {
     //     return output.wentWrong();
+    //   }
+    //   if (!hasPrefix) {
+    //     return;
     //   }
     //   if (!cassEXP.levelReached(meta.requiredLevel)) {
     //     return reply(
@@ -241,6 +249,10 @@ export async function use(obj) {
     // }
     const isShopUnlocked = await shop.isUnlocked(meta.name);
     if (!isShopUnlocked) {
+      if (!hasPrefix) {
+        return;
+      }
+
       const price = await shop.getPrice(meta.name);
       shopLabel: {
         if (price <= 0) {

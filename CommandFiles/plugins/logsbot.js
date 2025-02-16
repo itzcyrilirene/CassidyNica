@@ -11,8 +11,17 @@ export const meta = {
 
 const { Cassidy } = global;
 
+/**
+ *
+ * @param {CommandContext} obj
+ * @returns
+ */
 export async function use(obj) {
-  const { next, api, event } = obj;
+  const { next, api, event, output } = obj;
+
+  if (event.isWeb) {
+    return obj.next();
+  }
 
   try {
     if (
@@ -35,7 +44,7 @@ export async function use(obj) {
       });
 
       let threadName = "Unknown Group";
-      let messageLog = "**Thread Logs** 🔍";
+      let messageLog = "";
 
       if (event.logMessageType === "log:subscribe") {
         threadName =
@@ -55,7 +64,7 @@ export async function use(obj) {
         messageLog += `\n❌\n***Event***: Bot has been removed from a group\n- ***Removed by***: ${authorName}`;
       }
 
-      messageLog += `\n- ***User ID***: ${event.author}\n- ***Group***: ${threadName}\n- ***Group ID***: ${event.threadID}\n- ***Time***: ${time}\n࿇ ══━━━━✥◈✥━━━━══ ࿇`;
+      messageLog += `\n- ***User ID***: ${event.author}\n- ***Group***: ${threadName}\n- ***Group ID***: ${event.threadID}\n- ***Time***: ${time}`;
 
       const { ADMINBOT = [], MODERATORBOT = [] } = Cassidy?.config || {};
       const staffs = [...ADMINBOT, MODERATORBOT];
@@ -67,7 +76,15 @@ export async function use(obj) {
         if (isNaN(adminID)) {
           continue;
         }
-        await api.sendMessage(messageLog, adminID);
+        await output.sendStyled(
+          messageLog,
+          {
+            title: "Thread Logs 🔍",
+            titleFont: "bold",
+            contentFont: "fancy",
+          },
+          adminID
+        );
       }
     }
   } catch (error) {

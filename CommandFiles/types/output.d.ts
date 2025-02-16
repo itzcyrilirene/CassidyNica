@@ -43,6 +43,7 @@ declare module "output-cassidy" {
     frames(...args: (string | number)[]): Promise<any>;
     react(emoji: string, mid?: string): void;
     formatError(err: string | Error): string;
+    confirm(body: string, done?: CommandEntry): Promise<CommandContext>;
   }
 
   export default OutputProps;

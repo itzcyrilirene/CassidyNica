@@ -20,7 +20,7 @@ const logo = `🔎 [ **FAMILY FEUD** ] 🔍\n${UNIRedux.standardLine}\n`;
 
 function getRandomQuestion() {
   const data = JSON.parse(
-    fs.readFileSync(__dirname + "/json/familyfeud.json", "utf8")
+    fs.readFileSync(__dirname + "/json/familyfeud.json", "utf8"),
   );
   const index = Math.floor(Math.random() * data.length);
   return data[index];
@@ -91,7 +91,7 @@ export async function reply({
       ...answer,
       similarity: stringSimilarity.compareTwoStrings(
         answer.answer.toLowerCase(),
-        userAnswer
+        userAnswer,
       ),
       index: index,
     }));
@@ -108,8 +108,8 @@ export async function reply({
           (answer) =>
             stringSimilarity.compareTwoStrings(
               answer.answer.toLowerCase(),
-              userAnswer
-            ) > 0.7
+              userAnswer,
+            ) > 0.7,
         );
       } catch (error) {
         console.error("Translation error:", error);
@@ -124,9 +124,10 @@ export async function reply({
 
       if (allGuessed) {
         collectibles.raise("feudTickets", answers.length);
+        cassEXP.expControls.raise(20);
         await moneyH.set(input.senderID, {
           ...userData,
-          money: money + 5000,
+          cassEXP: cassEXP.raw(),
           collectibles: Array.from(collectibles),
           lastFeudGame: null,
           strikes: 0,
@@ -135,15 +136,15 @@ export async function reply({
         input.delReply(detectID);
         const allPoints = answers.reduce(
           (total, answer) => total + answer.points,
-          0
+          0,
         );
 
         return output.reply(
           `🏆 | Well done ${
             name?.split(" ")[0]
-          }! You've guessed all answers and earned **${allPoints} points** that's added to your balance!\nYou also won $5000! And 🎫 **${
+          }! You've guessed all answers and earned **${allPoints} points** that's added to your balance!\nYou also won 20 EXP! And 🎫 **${
             answers.length
-          }**.\n\n${generateTable(answers)}`
+          }**.\n\n${generateTable(answers)}`,
         );
       } else {
         const replyMessage = `✅ | Correct ${name?.split(" ")[0]}! "${
@@ -151,7 +152,7 @@ export async function reply({
         }" was worth **${
           correctAnswer.points
         } points** that was added to your balance!\n\nKeep guessing! (Reply more!)\n\nQuestion: ${question}\n\n${generateTable(
-          answers
+          answers,
         )}`;
         const xp = clamp(1, correctAnswer.points / 20, 10);
         cassEXP.expControls.raise(xp);
@@ -193,8 +194,8 @@ export async function reply({
           `[ ${"❌ ".repeat(strikes).trim()} ]\n\nSorry ${
             name?.split(" ")[0]
           }, you've received ten strikes! Better luck next time.\n\nQuestion: ${question}\n\n${generateTable(
-            answers
-          )}`
+            answers,
+          )}`,
         );
       } else {
         await moneyH.set(input.senderID, {
@@ -209,7 +210,7 @@ export async function reply({
         const replyMessage = `[ ${"❌ "
           .repeat(strikes)
           .trim()} ]\n\nSorry, but the survey says "${userAnswer}" is not the correct answer. Please try again! (Reply more!)\n\nQuestion: ${question}\n\n${generateTable(
-          answers
+          answers,
         )}`;
 
         const newReply = await output.reply(replyMessage);
@@ -312,7 +313,7 @@ Test your knowledge and try to guess the most popular answers in our Family Feud
       }
 
       const txt = `🕜 | You can use this command again in ${Math.ceil(
-        (10 * 60 * 1000 - elapsedTime) / 60 / 1000
+        (10 * 60 * 1000 - elapsedTime) / 60 / 1000,
       )} minutes.`;
 
       await output.reply(txt);
@@ -325,7 +326,7 @@ Test your knowledge and try to guess the most popular answers in our Family Feud
   });
   if (!name) {
     return output.reply(
-      `❌ | Please use the command ${prefix}identity-setname first.`
+      `❌ | Please use the command ${prefix}identity-setname first.`,
     );
   }
   if (!lastFeudGame || input.property["refresh"]) {
@@ -343,7 +344,7 @@ Test your knowledge and try to guess the most popular answers in our Family Feud
   const str = `👪 Question: **${
     lastFeudGame.question
   }**\n\nType your answer below (reply). You can type '${prefix}familyfeud guide' if you need help.\n${generateTable(
-    lastFeudGame.answers
+    lastFeudGame.answers,
   )}`;
 
   const info = await output.reply(str);
