@@ -40,7 +40,7 @@ export function convertLegacyStyling(style) {
     titleStyle: undefined,
     contentStyle: undefined,
     title: {
-      text_font: style.titleFont ?? "bold",
+      text_font: style.titleFont ?? "bold_italic",
       content:
         typeof style.title === "object"
           ? "Title Invalid"
