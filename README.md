@@ -1,6 +1,6 @@
-# CassidyRedux
+# CassidyNica
 
-CassidyRedux is a revamped version of CassidyBoT with enhanced features and improved performance created by lianecagara.
+CassidyNica is a fork of CassidyRedux, which is a revamped version of CassidyBoT with enhanced features and improved performance, created by lianecagara. CassidyNica builds upon CassidyRedux, introducing its own customizations and enhancements.
 
 # Changelog
 
