@@ -226,9 +226,12 @@ export async function entry({
   async function createItemMenu(page = 1) {
     page = Slicer.parseNum(page);
 
-    const ndriveItemsList = nicaItems.getAll();
-    const invItemsList = userInventory.getAll();
-
+    const ndriveItemsList = [...nicaItems.getAll()].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+    const invItemsList = [...userInventory.getAll()].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
     /**
      * @param {import("cassidy-userData").InventoryItem[]} items
      */
@@ -253,18 +256,8 @@ export async function entry({
      * @param {Array<(import("cassidy-userData").InventoryItem) & { count: number }>} items
      */
     function render(items) {
-      const groupedItems = items.reduce((acc, item) => {
-        if (!acc[item.key]) {
-          acc[item.key] = { ...item, count: 1 };
-        } else {
-          acc[item.key].count += 1;
-        }
-        return acc;
-      }, {});
-
-      const result = Object.values(groupedItems).map(
-        (item) =>
-          `${item.icon} **${item.name}** (x${item.count}) [${item.key}]`,
+      const result = [...items].map(
+        (item) => `${item.icon} **${item.name}** [${item.key}]`,
       );
       while (result.length < 8) {
         result.push("_".repeat(15));
@@ -273,8 +266,8 @@ export async function entry({
       return result.join("\n");
     }
 
-    const ndriveSlicer = new Slicer(group(ndriveItemsList), 8);
-    const invSlicer = new Slicer(group(invItemsList), 8);
+    const ndriveSlicer = new Slicer(ndriveItemsList, 8);
+    const invSlicer = new Slicer(invItemsList, 8);
     const more = `\n[...Type **${prefix}ndrive view ${page + 1}** to see more items]`;
     return `${UNIRedux.arrow} Page ${page} of ${Math.max(ndriveSlicer.pagesLength, invSlicer.pagesLength)}\n\n***👤 ${userData.name}*** (${userInventory.size()}/${invLimit})\n\n${render(invSlicer.getPage(page))}${page < invSlicer.pagesLength ? more : ""}\n${UNIRedux.standardLine}\n***💾 ${ndrive.name}*** (${nicaItems.size()}/${limit})\n\n${render(ndriveSlicer.getPage(page))}${page < ndriveSlicer.pagesLength ? more : ""}`;
   }
