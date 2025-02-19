@@ -1,4 +1,3 @@
-import { UserStatsManager } from "../../dist-commandfiles/handlers/database/handleStat.mjs";
 import { UNIRedux } from "../modules/unisym.js";
 import { Slicer } from "../plugins/utils-liane.js";
 export const meta = {
@@ -14,14 +13,32 @@ export const meta = {
   otherNames: ["intell", "nicaint"],
   requirement: "2.5.0",
   icon: "✨",
+  shopPrice: 1_000_000,
 };
+
+function formatDuration(ms) {
+  const seconds = Math.floor(ms / 1000) % 60;
+  const minutes = Math.floor(ms / (1000 * 60)) % 60;
+  const hours = Math.floor(ms / (1000 * 60 * 60)) % 24;
+  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+
+  const parts = [];
+  if (days > 0) parts.push(`${days} day${days > 1 ? "s" : ""}`);
+  if (hours > 0) parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
+  if (minutes > 0) parts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
+  if (seconds > 0) parts.push(`${seconds} second${seconds > 1 ? "s" : ""}`);
+
+  return parts.length > 1
+    ? parts.slice(0, -1).join(", ") + " and " + parts.slice(-1)
+    : parts[0] || "0 seconds";
+}
 
 const { invLimit } = global.Cassidy;
 
 export const style = {
   title: "IntellNica™ ✨",
   titleFont: "bold_italic",
-  contentFont: "fancy",
+  contentFont: "none",
 };
 
 const keys = [
@@ -40,12 +57,28 @@ const keys = [
   "spaceex",
   "trawl",
   "treasure",
+  "superwarp",
+  "explorer",
 ];
+
+/**
+ *
+ * @param {import("../types/gamesimu.js").Item} item
+ */
+function getEarnPerMinute(item) {
+  if (!item || item.delay <= 0) return [0, 0];
+
+  const attemptsPerMinute = 60 / item.delay;
+  const minEarnings = item.priceA * item.chance * attemptsPerMinute;
+  const maxEarnings = item.priceB * item.chance * attemptsPerMinute;
+
+  return [minEarnings, maxEarnings];
+}
 
 /**
  * Bypassing the goddamn system para lamang malaman yong game simulator na data.
  * @param {CommandContext} ctx
- * @returns {CommandContext}
+ *
  */
 const dangerousContext = (ctx) => {
   const money = {
@@ -64,8 +97,7 @@ const dangerousContext = (ctx) => {
       },
     }
   );
-  return {
-    ...ctx,
+  const dctx = {
     money,
     input: {
       ...ctx.input,
@@ -77,6 +109,17 @@ const dangerousContext = (ctx) => {
     output: dummy,
     GameSimulator: ctx.GameSimulator,
   };
+  class GameSimulator2 extends ctx.GameSimulator {
+    constructor(...args) {
+      super(...args);
+    }
+
+    simulateAction(ctx = dctx) {
+      return super.simulateAction(ctx);
+    }
+  }
+  dctx.GameSimulator = GameSimulator2;
+  return dctx;
 };
 
 /**
@@ -94,7 +137,7 @@ function getBestItems(itemData, actionTune = []) {
       const profit = (item.priceB - item.priceA) * item.chance * tuneBonus;
       const score = profit / item.delay;
 
-      return { ...item, score };
+      return { ...item, score, ref: item };
     })
     .sort((a, b) => b.score - a.score);
 }
@@ -103,7 +146,7 @@ function getBestItems(itemData, actionTune = []) {
  * Get the top 3 items that benefit the most from tuning.
  *
  * @param {import("../types/gamesimu.js").Item[]} itemData - Array of game items.
- * @returns {string[]} - Top 3 item names sorted by tuning effectiveness.
+ * @returns {import("../types/gamesimu.js").Item[]} - Top 3 item names sorted by tuning effectiveness.
  */
 function getBestTune(itemData) {
   if (!Array.isArray(itemData) || itemData.length === 0) return [];
@@ -116,12 +159,11 @@ function getBestTune(itemData) {
       const tunedScore = tunedProfit / item.delay;
       const scoreImprovement = tunedScore - baseScore;
 
-      return { name: item.name, scoreImprovement };
+      return { ...item, scoreImprovement, ref: item };
     })
     .filter((item) => item.scoreImprovement > 0)
     .sort((a, b) => b.scoreImprovement - a.scoreImprovement)
-    .slice(0, 3)
-    .map((item) => item.name);
+    .slice(0, 3);
 }
 
 /**
@@ -178,7 +220,7 @@ export async function entry(ctx) {
   } = ctx;
   let exist = [];
   let errs = {};
-  const targets = Object.values(commands).find((data) => {
+  const targets = Object.values(commands).filter((data) => {
     if (exist.includes(data.meta.name)) {
       return;
     }
@@ -213,24 +255,56 @@ export async function entry(ctx) {
       return [key, { actionStamp, actionMax, totalItems, actionTune }];
     })
   );
+  const renewPrice = 100;
 
   /**
-   * @type {Record<string, { name: string; icon: string; desc: string; callback: CommandEntry }>}
+   * @type {Record<string, { name: string; icon: string; desc: string; callback: CommandEntry; norenew?: boolean }>}
    */
   const opts = [
+    {
+      name: "subscribe",
+      icon: "💷",
+      norenew: true,
+      desc: `Renews Subscription for **💷${renewPrice.toLocaleString()}**`,
+      async callback() {
+        const { battlePoints = 0 } = userData;
+        if (battlePoints < renewPrice) {
+          return output.reply(
+            `❌ Not enough, you only had **💷${battlePoints.toLocaleString()}**, we need is **💷${renewPrice.toLocaleString()}**`
+          );
+        }
+        const { intellRenew } = userData;
+        const renewal = 24 * 60 * 60 * 1000;
+        const elapsed = Date.now() - intellRenew;
+        if (intellRenew && elapsed < renewal) {
+          return output.reply(`You have already renewed.`);
+        }
+        await money.set(input.senderID, {
+          intellRenew: Date.now(),
+          battlePoints: battlePoints - renewPrice,
+        });
+        return output.reply(
+          `${UNIRedux.arrow} Done! You may now use the commands.`
+        );
+      },
+    },
     {
       name: "best_tune",
       icon: "🚀",
       desc: "Finds the top 3 best-tuned items. Can specify a key.",
-      callback: (ctx) => {
-        const { GameSimulator, output, args } = ctx;
+      async callback() {
         const key = args[1];
+        if (!key) {
+          return output.reply(
+            `Type ${prefix}${commandName} best_tune <key> to check a specific game.`
+          );
+        }
 
         let selectedSimulators = key
           ? simulatorData[key]
             ? [simulatorData[key]]
             : []
-          : Object.values(simulatorData);
+          : [];
 
         const allItems = selectedSimulators
           .flatMap((sim) => sim.itemData)
@@ -245,39 +319,111 @@ export async function entry(ctx) {
         }
 
         const bestTunes = getBestTune(allItems);
-        output.reply(
+        const info = await output.reply(
           `${
             bestTunes.length
               ? `🚀 **Top 3 Tuned Items${key ? ` in ${key}` : ""}:**\n${
                   UNIRedux.arrow
-                } ${bestTunes.join(`\n${UNIRedux.arrowFromT} `)}`
+                } ${bestTunes
+                  .map(
+                    (i) =>
+                      `${i.icon} **${i.name}**\nFrom: **${
+                        selectedSimulators.find((j) =>
+                          j.itemData.includes(i.ref)
+                        )?.key ?? "Can't find."
+                      }**\nEarns Per Minute: between 💵**${getEarnPerMinute(
+                        i
+                      )[0].toLocaleString()}** and 💵**${getEarnPerMinute(
+                        i
+                      )[1].toLocaleString()}**\nRarity: ${
+                        100 - i.chance * 100
+                      }%\nProcessing Time: ${
+                        i.delay
+                      } minutes.\nPrice Range:\nBetween ${i.priceA} and ${
+                        i.priceB
+                      }.`
+                  )
+                  .join(`\n\n${UNIRedux.arrowFromT} `)}`
               : `⚠️ No significant tuning benefits found${
                   key ? ` in ${key}` : ""
                 }.`
           }\n\n${
             UNIRedux.arrowBW
-          } Type ${prefix} ${commandName} best_tune <key> to check a specific game.`
+          } Type ${prefix}${commandName} best_tune <key> to check a specific game.\nReply with **tune** to apply the tuning.`
         );
+        input.setReply(info.messageID, {
+          /**
+           *
+           * @param {CommandContext} ctx2
+           */
+          async callback(ctx2) {
+            if (ctx2.input.senderID !== input.senderID) {
+              return;
+            }
+            if (ctx2.input.body.toLowerCase() !== "tune") {
+              return;
+            }
+            const from = selectedSimulators.find((j) =>
+              j.itemData.includes(bestTunes[0].ref)
+            );
+            const state = simulatorStates[from.key];
+            if (!from || !state) {
+              return output.wentWrong();
+            }
+            const names = bestTunes.map((i) => i.name);
+            if (names.length < 3) {
+              return output.wentWrong();
+            }
+            await ctx2.money.set(input.senderID, {
+              [from.key + "Tune"]: [...names],
+              [from.key + "Stamp"]: state.actionStamp ?? Date.now(),
+            });
+            return ctx2.output.replyStyled(
+              `✅ **Applied best tunes!**\n${UNIRedux.arrow} ${bestTunes
+                .map(
+                  (i) =>
+                    `${i.icon} **${i.name}**\nFrom: **${
+                      selectedSimulators.find((j) => j.itemData.includes(i.ref))
+                        ?.key ?? "Can't find."
+                    }**\nEarns Per Minute: between 💵**${getEarnPerMinute(
+                      i
+                    )[0].toLocaleString()}** and 💵**${getEarnPerMinute(
+                      i
+                    )[1].toLocaleString()}**\nRarity: ${
+                      100 - i.chance * 100
+                    }%\nProcessing Time: ${
+                      i.delay
+                    } minutes.\nPrice Range:\nBetween ${i.priceA} and ${
+                      i.priceB
+                    }.`
+                )
+                .join(`\n\n${UNIRedux.arrowFromT} `)}`,
+              style
+            );
+          },
+        });
       },
     },
     {
       name: "best_items",
       icon: "🏆",
       desc: "Finds the best items.",
-      callback: (ctx) => {
-        const { GameSimulator, output, args } = ctx;
-        const key = args[1];
+      callback() {
+        const key = args[1] || "all";
+        const page = Slicer.parseNum(args[2]);
 
-        let selectedSimulators = key
-          ? simulatorData[key]
-            ? [simulatorData[key]]
-            : []
-          : Object.values(simulatorData);
-        let selectedTunes = key
-          ? simulatorStates[key]
-            ? [simulatorStates[key]]
-            : []
-          : Object.values(simulatorStates);
+        let selectedSimulators =
+          key !== "all"
+            ? simulatorData[key]
+              ? [simulatorData[key]]
+              : []
+            : Object.values(simulatorData);
+        let selectedTunes =
+          key !== "all"
+            ? simulatorStates[key]
+              ? [simulatorStates[key]]
+              : []
+            : Object.values(simulatorStates);
 
         const allItems = selectedSimulators
           .flatMap((sim) => sim.itemData)
@@ -292,19 +438,42 @@ export async function entry(ctx) {
           );
         }
 
-        const bestItems = getBestItems(allItems, allTunes).slice(0, 10);
+        const bestItemsX = getBestItems(allItems, allTunes);
+        const slicer = new Slicer(bestItemsX, 3);
+        const bestItems = slicer.getPage(page);
         output.reply(
           `${
-            bestTunes.length
+            bestItems.length
               ? `🚀 **Best Items${key ? ` in ${key}` : ""}:**\n${
                   UNIRedux.arrow
+                } Page ${page} of ${slicer.pagesLength + 1}\n\n${
+                  UNIRedux.arrow
                 } ${bestItems
-                  .map((i) => `${i.name}`)
-                  .join(`\n${UNIRedux.arrowFromT} `)}`
+                  .map(
+                    (i) =>
+                      `${i.icon} **${i.name}**\nFrom: **${
+                        selectedSimulators.find((j) =>
+                          j.itemData.includes(i.ref)
+                        )?.key ?? "Can't find."
+                      }**\nEarns Per Minute: between 💵**${getEarnPerMinute(
+                        i
+                      )[0].toLocaleString()}** and 💵**${getEarnPerMinute(
+                        i
+                      )[1].toLocaleString()}**\nScore: ${i.score}\nRarity: ${
+                        100 - i.chance * 100
+                      }%\nProcessing Time: ${
+                        i.delay
+                      } minutes.\nPrice Range:\nBetween ${i.priceA} and ${
+                        i.priceB
+                      }.`
+                  )
+                  .join(`\n\n${UNIRedux.arrowFromT} `)}`
               : `⚠️ No best items found${key ? ` in ${key}` : ""}.`
           }\n\n${
             UNIRedux.arrowBW
-          } Type ${prefix} ${commandName} best_items <key> to check a specific game.`
+          } Type ${prefix}${commandName} best_items <key|all> to check a specific game.\n${
+            UNIRedux.arrowBW
+          } Type ${prefix}${commandName} best_items <key|all> <page> to check the next page.`
         );
       },
     },
@@ -312,15 +481,17 @@ export async function entry(ctx) {
       name: "list",
       icon: "📜",
       desc: "Lists available game keys for inspection.",
-      callback: (ctx) => {
-        const { GameSimulator, output } = ctx;
-        const keys = Object.keys(simulatorData);
+      callback() {
+        const entries = Object.entries(simulatorData);
 
         output.reply(
-          keys.length
-            ? `📜 **Available Game Keys:**\n${UNIRedux.arrow} ${keys.join(
-                `\n${UNIRedux.arrowFromT} `
-              )}`
+          entries.length
+            ? `📜 **Available Game Keys:**\n${UNIRedux.arrow} ${entries
+                .map(
+                  ([key, value]) =>
+                    `${value.checkIcon} ${value.actionEmoji} **${key}**`
+                )
+                .join(`\n${UNIRedux.arrowFromT} `)}`
             : "⚠️ No game keys available."
         );
       },
@@ -330,31 +501,70 @@ export async function entry(ctx) {
       name: "best_game",
       icon: "🎮",
       desc: "Finds the most efficient game simulators.",
-      callback: (ctx) => {
+      callback() {
         const { GameSimulator, output, money, input } = ctx;
         const userData = money.get(input.senderID);
 
         const bestGames = getBestGames(simulatorData, simulatorStates).slice(
           0,
-          3
+          10
         );
         output.reply(
           bestGames.length
-            ? `🎮 **Top 3 Game Simulators:**\n${bestGames
+            ? `🎮 **Top 10 Game Simulators:**\n${bestGames
                 .map(
                   (game) =>
-                    `${UNIRedux.charm} ${game.icon} ${
-                      game.key
-                    } (Avg Score: ${game.avgScore.toFixed(2)})`
+                    `${UNIRedux.charm} ${game.simulator.checkIcon} ${
+                      game.simulator.actionEmoji
+                    } **${game.key}** (Avg Score: ${game.avgScore.toFixed(2)})`
                 )
                 .join("\n")}`
             : "⚠️ No high-performing games found."
         );
       },
     },
+    {
+      name: "list_tuned",
+      icon: "🎮",
+      desc: "List tuned commands.",
+      callback() {
+        const str = Object.values(simulatorData)
+          .sort(
+            (a, b) =>
+              Date.now() -
+              (simulatorStates[b.key]?.actionTune ?? 0) -
+              (Date.now() - (simulatorStates[a.key]?.actionTune ?? 0))
+          )
+          .map((i) => {
+            const states = simulatorStates[i.key];
+            return `${UNIRedux.arrowBW} ${states.actionStamp ? "✅" : "❌"} ${
+              i.actionEmoji
+            } **${i.key}**:\nTime Since Tuning: **${
+              states.actionStamp
+                ? formatDuration(Date.now() - states.actionStamp)
+                : "Not tuned yet."
+            }**`;
+          })
+          .join(`\n\n`);
+        return output.reply(`🚀 **Tuned commands.**\n\n${str}`);
+      },
+    },
   ];
+  const [sub, ...subArgs] = args;
 
   const handler = opts.find((i) => i.name === sub);
+  output.append = `${UNIRedux.standardLine}\nPing: ${
+    Date.now() - timeA
+  }\nRenew Before: ${
+    userData.intellRenew
+      ? formatDuration(
+          Math.max(
+            24 * 60 * 60 * 1000 - (Date.now() - (userData.intellRenew ?? 0)),
+            0
+          )
+        )
+      : "??"
+  }`;
 
   if (!handler) {
     const items = opts
@@ -369,6 +579,24 @@ export async function entry(ctx) {
     return output.reply(
       `🏗️🚧 Sorry, this feature is still a **work in progress.**`
     );
+  }
+
+  if (!handler.norenew) {
+    const { intellRenew } = userData;
+    const renewal = 24 * 60 * 60 * 1000;
+    const elapsed = Date.now() - intellRenew;
+    const c = input.isAdmin && input.propertyArray.includes("cheat");
+    if (!intellRenew && !c) {
+      return output.reply(
+        `🔒 You need to use the subscribe option first. It will only cost you **💷${renewPrice.toLocaleString()}**`
+      );
+    } else if (elapsed > renewal && !c) {
+      return output.reply(
+        `⚠️ **Subscription Expired!**\nPlease use the subscribe option again to renew your subscription. It will only cost you **💷${renewPrice.toLocaleString()}**.\n\nSince: ${formatDuration(
+          elapsed
+        )}`
+      );
+    }
   }
 
   return handler.callback();
