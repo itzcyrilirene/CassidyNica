@@ -2,10 +2,46 @@
 
 CassidyNica is a fork of CassidyRedux, which is a revamped version of CassidyBoT with enhanced features and improved performance, created by lianecagara. CassidyNica builds upon CassidyRedux, introducing its own customizations and enhancements.
 
-# Changelog
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [Changelog](#changelog)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+  - [Deployment](#deployment)
+- [Creating Commands](#creating-commands)
+  - [Command Structure](#command-structure)
+  - [Meta Options](#meta-options)
+  - [Context Variables](#context-variables)
+  - [Example Command](#example-command)
+- [Core Files](#core-files)
+- [License](#license)
+
+## Introduction
+
+CassidyRedux is designed to be a powerful and extensible bot framework that allows developers to create and manage a wide range of commands and functionalities. It leverages modern JavaScript features and provides a structured approach to command creation and management.
+
+## Features
+
+- **Command Management**: Easily create, register, and manage commands.
+- **API Integration**: Integrate with various APIs to extend the bot's capabilities.
+- **Customizable**: Highly customizable with support for plugins and middleware.
+- **Performance**: Optimized for performance with parallel execution of plugins.
+- **Extensible**: Support for external plugins and modules.
+- **User Management**: Manage users, permissions, and roles.
+- **Inventory System**: Advanced inventory management with support for indexing and limits.
+- **Idle Games**: Built-in support for idle games.
+- **CORS Support**: Cross-Origin Resource Sharing (CORS) support for web integrations.
+- **Dynamic WS Protocol**: Dynamic WebSocket protocol for real-time communication.
+- **Enhanced UI**: Improved user interface with support for themes and custom fonts.
+
+## Changelog
 
 All notable changes to this project will be documented in this file.
-
 
 ### 🚀 Features
 
@@ -38,7 +74,7 @@ All notable changes to this project will be documented in this file.
 - *(shop)* Tiles theme
 - *(exp)* Shop now give exp
 - *(type)* Cheque types
-- *(cmd)* First ever mutiplayer game
+- *(cmd)* First ever multiplayer game
 - *(exp)* Lock command by exp
 - *(idle)* Harvest gets upgrade
 - Mine
@@ -115,7 +151,7 @@ All notable changes to this project will be documented in this file.
 
 ### Configuration
 
-1. Create a `.env` file in the root directory and add the following:
+1. Create a .env file in the root directory and add the following:
 
    ```env
    MONGO_URI="replace with the mongodb uri"
@@ -129,85 +165,159 @@ All notable changes to this project will be documented in this file.
    npm start
    ```
 
-## Documentation
+## Creating Commands
 
-### Handlers
+### Command Structure
 
-- **FCA Handler**: Provides functionality for Facebook Chat API.
-  - This repo is a fork from the main repo and will have new features bundled faster than the main repo (and may include some bugs).
-  - See the main repo [here](https://github.com/Schmavery/facebook-chat-api).
+A command in CassidyRedux is typically defined in a JavaScript file with the following structure:
 
-  #### Example Usage
-
-  ```javascript
-  const login = require("fb-chat-api-temp");
-
-  // Create simple echo bot
-  login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
-      if(err) return console.error(err);
-
-      api.listen((err, message) => {
-          api.sendMessage(message.body, message.threadID);
-      });
-  });
-  ```
-
-- **Styler Handler**: A JavaScript utility designed to apply dynamic styling to text content.
-  
-  #### Example Usage
-
-  ```javascript
-  export class Style {
-    title = {
-      content: "Example Title",
-      line_top: "default",
-      line_bottom: "20chars",
-      text_font: "bold",
-      text_kerning: "5",
-      text_prefix: "[",
-      text_suffix: "]",
-      text_trim: true
+```javascript
+export const meta = {
+    name: "example",
+    otherNames: ["ex", "examples"],
+    author: "Author's Name",
+    version: '1.0.0',
+    description: "This is an example command used in demonstration.",
+    usage: "{prefix}{name}",
+    category: "Examples",
+    noPrefix: "both",
+    permissions: [0, 1, 2],
+    botAdmin: false,
+    waitingTime: 10,
+    ext_plugins: {
+        output: "^1.0.0"
     },
-    content = {
-      content: null,
-      line_top: "hidden",
-      line_bottom: "default",
-      text_font: "fancy",
-      text_kerning: "3",
-      text_prefix: "",
-      text_suffix: "",
-      text_trim: false,
-      number_font: "bold"
+    whiteList: [
+        "id1",
+        "id2"
+    ],
+    args: [
+        {
+            degree: 0,
+            fallback: null,
+            response: "You cannot use this argument",
+            search: "disallowedArg",
+            required: false,
+        }
+    ],
+    supported: "^1.0.0"
+};
+
+export async function entry({ input, output }) {
+    output.reply('Hello, this is an example command!');
+}
+```
+
+### Meta Options
+
+The `meta` object contains important configuration information for the command. Here are the available options:
+
+- **name**: The primary name of the command.
+- **otherNames**: An array of alternative names for the command.
+- **author**: The author of the command.
+- **version**: The version of the command.
+- **description**: A brief description of what the command does.
+- **usage**: Instructions on how to use the command.
+- **category**: The category under which the command falls.
+- **noPrefix**: Specifies whether the command can be used without a prefix. Possible values are "both", true, or false.
+- **permissions**: An array specifying the required permissions to use the command. (0: non-admin, 1: gc admin, 2: bot admin)
+- **botAdmin**: A boolean indicating whether the command requires bot admin permissions.
+- **waitingTime**: The cooldown time (in seconds) before the command can be used again.
+- **ext_plugins**: An object specifying external plugins required by the command.
+- **whiteList**: An array of user IDs that are allowed to use the command.
+- **args**: An array of argument configurations. Each argument can have the following properties:
+  - **degree**: The degree of the argument.
+  - **fallback**: The fallback value if the argument is not provided.
+  - **response**: The response message if the argument is not allowed.
+  - **search**: The search term for the argument.
+  - **required**: A boolean indicating whether the argument is required.
+- **supported**: The supported version of the command.
+
+### Context Variables
+
+When defining the `entry` function for your command, you have access to several context variables:
+
+- **input**: The input object containing information about the command invocation.
+  - **input.text**: The text of the command.
+  - **input.senderID**: The ID of the user who sent the command.
+  - **input.threadID**: The ID of the thread where the command was sent.
+  - **input.arguments**: An array of arguments passed to the command.
+  - **input.isAdmin**: A boolean indicating whether the user is an admin.
+  - **input.replier**: The replier object if the command is a reply.
+- **output**: The output object used to send responses back to the user.
+  - **output.reply(text)**: Sends a reply to the user.
+  - **output.error(err)**: Sends an error message to the user.
+  - **output.send(text, id)**: Sends a message to a specific user or thread.
+  - **output.add(user, thread)**: Adds a user to a thread.
+  - **output.kick(user, thread)**: Kicks a user from a thread.
+  - **output.unsend(mid)**: Unsend a message by its ID.
+  - **output.reaction(emoji, mid)**: Reacts to a message with an emoji.
+- **event**: The event object containing details about the event that triggered the command.
+- **api**: The API object for interacting with the platform (e.g., sending messages).
+- **commandName**: The name of the command being executed.
+- **args**: An array of arguments passed to the command.
+
+### Example Command
+
+Here is a more detailed example of a command that uses various meta options and context variables:
+
+```javascript
+export const meta = {
+    name: "greet",
+    otherNames: ["hello", "hi"],
+    author: "Author's Name",
+    version: '1.0.0',
+    description: "Sends a greeting message.",
+    usage: "{prefix}greet [name]",
+    category: "General",
+    noPrefix: "both",
+    permissions: [0],
+    botAdmin: false,
+    waitingTime: 5,
+    ext_plugins: {
+        output: "^1.0.0"
     },
-    bottomField = {
-      content: "Cool Info",
-      line_top: "7chars",
-      text_font: "fancy_italic",
-      text_kerning: "0"
-    }
-  }
-  ```
+    whiteList: null,
+    args: [
+        {
+            degree: 0,
+            fallback: "User",
+            response: "You need to provide a name.",
+            search: "name",
+            required: false,
+        }
+    ],
+    supported: "^1.0.0"
+};
 
-### Available Fonts
+export async function entry({ input, output, args }) {
+    const name = args[0] || "User";
+    output.reply(`Hello, ${name}!`);
+}
+```
 
-- Ｗｉｄｅｓｐａｃｅ
-- 𝐒𝐞𝐫𝐢𝐟
-- 𝓗𝓪𝓷𝓭𝔀𝓻𝓲𝓽𝓲𝓷𝓰
-- 𝑺𝒄𝒓𝒊𝒑𝒕𝒃𝒐𝒍𝒅
-- 𝑆𝑐𝑟𝑖𝑝𝑡
-- 𝚃𝚢𝚙𝚎𝚠𝚛𝚒𝚝𝚎𝚛
-- 𝗕𝗼𝗹𝗱 
-- 𝖥𝖺𝗇𝖼𝗒
-- 𝐌𝚘𝚘𝚍𝚢
-- 𝘽𝙤𝙡𝙙 𝙄𝙩𝙖𝙡𝙞𝙘
-- 𝘍𝘢𝘯𝘤𝘺 𝘐𝘵𝘢𝘭𝘪𝘤
-- 𝔻𝕠𝕦𝕓𝕝𝕖 𝕊𝕥𝕣𝕦𝕔𝕜
+## Core Files
 
+### Cassidy.js
+
+This file contains the core logic and configuration for CassidyRedux. It includes methods for loading commands, plugins, and managing the bot's state.
+
+### api.js
+
+This file defines the `api` command, which provides access to Cassidy's Developer API. It includes various handlers for different API functionalities.
+
+### loadCommand.js
+
+This file contains the logic for loading and registering commands in CassidyRedux.
+
+### loadPlugins.js
+
+This file contains the logic for loading and managing plugins in CassidyRedux.
+
+### extends.js
+
+This file extends the core functionality of CassidyRedux with additional features and utilities.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Thanks to [Schmavery](https://github.com/Schmavery) for the original Facebook Chat API.
+This project is licensed under a special LICENSE, see the LICENSE file for details.

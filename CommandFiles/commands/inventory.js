@@ -300,6 +300,7 @@ export async function entry({ ...ctx }) {
           }
 
           item ??= {};
+          item.type ??= "generic";
           if (item?.type === "food") {
             return output.reply(
               `${item.icon} **${item.name}** is a general food item that can be used to **feed your pet**. 

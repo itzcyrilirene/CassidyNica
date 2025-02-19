@@ -7,6 +7,11 @@ import type {
 import type InputX from "input-cassidy";
 import type OutputX from "output-cassidy";
 import { CassEXP } from "./CommandFiles/modules/cassEXP.js";
+import type {
+  GameSimulator,
+  GameSimulatorProps,
+  Item,
+} from "./CommandFiles/types/gamesimu.d.ts";
 
 export {};
 
@@ -42,6 +47,8 @@ declare global {
     amount: number;
     key: string;
   }
+  interface InventoryConstructor extends Inventory {}
+  interface GameSimulatorConstructor extends GameSimulator {}
 
   interface CommandContext {
     [key: string]: any;
@@ -58,6 +65,7 @@ declare global {
     commands: { [key: string]: any };
     CassEXP: typeof CassEXP;
     userDataCache: UserData;
+    GameSimulator: typeof GameSimulator;
   }
 
   interface RecipeResult extends Cass.InventoryItem {}

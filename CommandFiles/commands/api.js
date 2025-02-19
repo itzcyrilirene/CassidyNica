@@ -35,6 +35,9 @@ export async function entry(ctx) {
   return output.reply(result);
 }
 
+/**
+ * @type {Record<string, CommandEntry>}
+ */
 const handlers = {
   async redux_demo(ctx) {
     const home = new ReduxCMDHome(
@@ -369,4 +372,5 @@ ${item.flavorText ?? "Not Configured"}
       callback: handleInput,
     });
   },
+  async btest({ input, output, api }) {},
 };
