@@ -5,6 +5,9 @@
   "100075058221244": {
     "name": "Liane Cagara 🎀"
   },
+  "100076505922281": {
+    "name": "Jenica Ferrer"
+  },
   "web:MTMxLjIyNi4xMDYuNjg": {
     "name": "Iphone 15 PRO"
   },
@@ -66,10 +69,7 @@
     "type": "friend",
     "isFriend": true,
     "isBirthday": false,
-    "searchTokens": [
-      "Vanderbilt",
-      "Arthur"
-    ],
+    "searchTokens": ["Vanderbilt", "Arthur"],
     "alternateName": ""
   }
 }
