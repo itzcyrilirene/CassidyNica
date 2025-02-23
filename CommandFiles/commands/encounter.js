@@ -294,7 +294,7 @@ The first **pet** will become the leader, which who can use the 🔊 **Act**`);
           `\n\n` +
           `* ${dialogue}\n\n${
             isGood ? opponent.spareText() : opponent.fledText()
-          }\nObtained **${pts} 💷 Battle Points!**\n${
+          }\nObtained **${pts} 💶 Pet Points!**\n${
             opponent.winDias && collectibles.has("gems")
               ? `You also won **${opponent.winDias}** 💎!`
               : ""

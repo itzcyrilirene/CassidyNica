@@ -818,11 +818,12 @@ export async function use(obj) {
         return `🗃️ **Steal**\n💰 **Take**\n📄 **Read**\n🏠 **Leave**`;
       }
       //return `💵 **Buy**\n💰 **Sell**\n⚒️ **Trade**\n💬 **Talk**\n🏠 **Leave**`;
-      return `      💵        💰         ⚒ 
-     **Buy**     **Sell**     **Trade**
+      //   return `      💵        💰         ⚒
+      //  **Buy**     **Sell**     **Trade**
 
-            💬         🏠 
-          **Talk**     **Leave**`;
+      //         💬         🏠
+      //       **Talk**     **Leave**`;
+      return `🛒 **Marketplace**  \n💲 Buy | 📦 Sell | 🔄 Trade\n\n💭 **Community**  \n🗨️ Talk | 🚪 Leave\n\n[ Reply with the option you want, without prefix or quotes. ]`;
     }
     async onPlay(context = obj) {
       try {

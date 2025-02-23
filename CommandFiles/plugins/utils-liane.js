@@ -1188,7 +1188,7 @@ export async function use(obj) {
                 return output.reply(
                   `❌ The price of "${
                     self.key
-                  }" **storage** upgrade is **${price.toLocaleString()}**💷 but you only have **${bp.toLocaleString()}**💷.\n\n**Before Upgrading**: ${Number(
+                  }" **storage** upgrade is **${price.toLocaleString()}**💶 but you only have **${bp.toLocaleString()}**💶.\n\n**Before Upgrading**: ${Number(
                     storage
                   ).toLocaleString()} 🗃️\n**After Upgrading**: ${(
                     storage * 2
@@ -1199,13 +1199,13 @@ export async function use(obj) {
               const i = await output.reply(
                 `⚠️ Buy "${
                   self.key
-                }" storage upgrade for **${price.toLocaleString()}**💷?\n**Before Upgrading**: ${Number(
+                }" storage upgrade for **${price.toLocaleString()}**💶?\n**Before Upgrading**: ${Number(
                   storage
                 ).toLocaleString()} 🗃️\n**After Upgrading**: ${(
                   storage * 2
-                ).toLocaleString()} 🗃️\n\n**Battle Points**\nBefore - **${bp.toLocaleString()}**💷\nAfter - **${(
+                ).toLocaleString()} 🗃️\n\n**Battle Points**\nBefore - **${bp.toLocaleString()}**💶\nAfter - **${(
                   bp - price
-                ).toLocaleString()}**💷\n\n***Reply anything to confirm***`
+                ).toLocaleString()}**💶\n\n***Reply anything to confirm***`
               );
 
               input.setReply(i.messageID, {
@@ -1223,9 +1223,9 @@ export async function use(obj) {
                   await output.replyStyled(
                     `✅ Successfully purchased "${self.key}"${
                       hasDiscount ? "25% OFF! 🎀" : ""
-                    } storage upgrade for ${price}💷!\n\n**Old Storage**: ${storage} 🗃️\n**New Storage**: ${
+                    } storage upgrade for ${price}💶!\n\n**Old Storage**: ${storage} 🗃️\n**New Storage**: ${
                       storage * 2
-                    } 🗃️\n**New Battle Points**: ${bp - price}💷 (-${price})`,
+                    } 🗃️\n**New Pet Points**: ${bp - price}💶 (-${price})`,
                     context.command?.style ?? {
                       title: "🛒 Upgrader",
                       titleFont: "bold",

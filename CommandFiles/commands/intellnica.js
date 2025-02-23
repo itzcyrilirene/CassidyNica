@@ -263,14 +263,14 @@ export async function entry(ctx) {
   const opts = [
     {
       name: "subscribe",
-      icon: "💷",
+      icon: "💶",
       norenew: true,
-      desc: `Renews Subscription for **💷${renewPrice.toLocaleString()}**`,
+      desc: `Renews Subscription for **💶${renewPrice.toLocaleString()}**`,
       async callback() {
         const { battlePoints = 0 } = userData;
         if (battlePoints < renewPrice) {
           return output.reply(
-            `❌ Not enough, you only had **💷${battlePoints.toLocaleString()}**, we need is **💷${renewPrice.toLocaleString()}**`
+            `❌ Not enough, you only had **💶${battlePoints.toLocaleString()}**, we need is **💶${renewPrice.toLocaleString()}**`
           );
         }
         const { intellRenew } = userData;
@@ -588,11 +588,11 @@ export async function entry(ctx) {
     const c = input.isAdmin && input.propertyArray.includes("cheat");
     if (!intellRenew && !c) {
       return output.reply(
-        `🔒 You need to use the subscribe option first. It will only cost you **💷${renewPrice.toLocaleString()}**`
+        `🔒 You need to use the subscribe option first. It will only cost you **💶${renewPrice.toLocaleString()}**`
       );
     } else if (elapsed > renewal && !c) {
       return output.reply(
-        `⚠️ **Subscription Expired!**\nPlease use the subscribe option again to renew your subscription. It will only cost you **💷${renewPrice.toLocaleString()}**.\n\nSince: ${formatDuration(
+        `⚠️ **Subscription Expired!**\nPlease use the subscribe option again to renew your subscription. It will only cost you **💶${renewPrice.toLocaleString()}**.\n\nSince: ${formatDuration(
           elapsed
         )}`
       );

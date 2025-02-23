@@ -217,7 +217,7 @@ export const entryConfig = {
         const storage = userData[val.key]
           ? userData[val.key] * 2
           : "Unknown..?";
-        text += `**${name}** - ${price}💷 ${
+        text += `**${name}** - ${price}💶 ${
           hasDiscount ? `(${originalPrice}$) \n25% OFF! 🎀` : ""
         }${userData.battlePoints < price ? "❌" : "💰"}\n🗃️ LV${LV} Storage: ${
           isNaN(storage) ? storage : storage / 2
@@ -264,17 +264,17 @@ Type ${prefix}**shop.storage buy <item name>** fo buy an upgrade.`
     let price = Math.floor(data.price * 2 ** upgrades * multiplier);
     if (userMoney < price) {
       return output.reply(
-        `❌ The price of "${args[1]}" **storage** upgrade is ${price}💷 but you only have ${userMoney}💷.`
+        `❌ The price of "${args[1]}" **storage** upgrade is ${price}💶 but you only have ${userMoney}💶.`
       );
     }
     await output.quickWaitReact(
       `⚠️ Buy "${
         args[1]
-      }" storage upgrade for ${price}💷?\n**Old Storage**: ${storage} 🗃️\n**New Storage**: ${
+      }" storage upgrade for ${price}💶?\n**Old Storage**: ${storage} 🗃️\n**New Storage**: ${
         storage * 2
-      } 🗃️\n\n**Battle Points**\nBefore - ${userMoney}💷\nAfter - ${
+      } 🗃️\n\n**Pet Points**\nBefore - ${userMoney}💶\nAfter - ${
         userMoney - price
-      }💷`,
+      }💶`,
       {
         authorOnly: true,
         edit: "✅ Proceeding...",
@@ -288,9 +288,9 @@ Type ${prefix}**shop.storage buy <item name>** fo buy an upgrade.`
     await output.reply(
       `✅ Successfully purchased "${args[1]}"${
         hasDiscount ? "25% OFF! 🎀" : ""
-      } storage upgrade for ${price}💷!\n\n**Old Storage**: ${storage} 🗃️\n**New Storage**: ${
+      } storage upgrade for ${price}💶!\n\n**Old Storage**: ${storage} 🗃️\n**New Storage**: ${
         storage * 2
-      } 🗃️\n**New Battle Points**: ${userMoney - price}💷 (-${price})`
+      } 🗃️\n**New Pet Points**: ${userMoney - price}💶 (-${price})`
     );
   },
   async tiles({ input, output, args, money, prefix }) {
@@ -419,7 +419,7 @@ const home = new ReduxCMDHome({
     storage: {
       key: "storage",
       description:
-        "Upgrade your storage for games like Harvest or Mine using your battle points.",
+        "Upgrade your storage for games like Harvest or Mine using your pet points.",
       args: ["buy <item_name | no argument: lists items>"],
       aliases: ["-s", "sto"],
     },

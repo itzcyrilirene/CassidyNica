@@ -99,9 +99,9 @@ export async function entry({
     output.reply(
       `${
         UNIRedux.charm
-      } You've claimed your daily reward! Come back tomorrow for more.\n\n🧪 **x${extraEXP}** Experience Points (exp)\n💵 **x${dailyReward.toLocaleString()}** Money (money)\n💷 **x${Math.floor(
+      } You've claimed your daily reward! Come back tomorrow for more.\n\n🧪 **x${extraEXP}** Experience Points (exp)\n💵 **x${dailyReward.toLocaleString()}** Money (money)\n💶 **x${Math.floor(
         dailyReward / 10
-      ).toLocaleString()}** Battle Points (battlePoints)`
+      ).toLocaleString()}** Pet Points (battlePoints)`
     );
   }
 }

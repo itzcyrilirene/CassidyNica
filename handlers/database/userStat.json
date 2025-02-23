@@ -208,7 +208,7 @@
     "lastGiftClaim": 1739539533452
   },
   "wss:admin": {
-    "money": 100200,
+    "money": 100000,
     "exp": 0,
     "name": "Admin",
     "virtualFiles": {
@@ -230,7 +230,7 @@
         }
       ]
     },
-    "lastModified": 1739605274458,
+    "lastModified": 1740315761404,
     "inventory": [],
     "lastGiftClaim": 1739605261527,
     "fishStamp": 1735977461906,
@@ -331,11 +331,14 @@
       ],
       "storageRequested": 1e+22,
       "premium": false
+    },
+    "shopInv": {
+      "pet": true
     }
   },
   "test": {
     "money": 0,
     "exp": 0,
-    "lastModified": 1739618688202
+    "lastModified": 1740318206097
   }
 }

@@ -177,10 +177,12 @@ export async function use(obj) {
         global.Cassidy.config.maintenanceMode &&
         !ADMINBOT.includes(senderID)
       ) {
-        return reply(`❌ | Only bot admins can use the bot right now... Maintenance!`);
+        return reply(
+          `❌ | Only bot admins can use the bot right now... Maintenance!`
+        );
       }
       return output.reply(
-       `❓ | The command "${commandName}" does not exist. Please type "${prefix}help" to see the list of available commands.`
+        `❓ | The command "${commandName}" does not exist. Please type "${prefix}help" to see the list of available commands.`
       );
     }
     async function isThreadAdmin(uid) {
@@ -211,8 +213,7 @@ export async function use(obj) {
     obj.userDataCache = userDataCache;
     obj.shopCache = shop;
 
-
-    if (!userDataCache.name && meta.name !== "identity") {
+    if (!userDataCache.name && meta.name !== "changeuser") {
       if (!hasPrefix) {
         return;
       }
@@ -410,7 +411,9 @@ Date: ${new Date(user.banned?.date).toLocaleString()}`);
         if (isFn(noPermission)) {
           return await noPermission(obj);
         }
-        return reply(`❌ | The command "${commandName}" is only exclusive to bot admins.`);
+        return reply(
+          `❌ | The command "${commandName}" is only exclusive to bot admins.`
+        );
       }
     }
 

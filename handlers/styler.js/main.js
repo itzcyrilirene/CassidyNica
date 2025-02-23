@@ -357,7 +357,7 @@ export function fontNumbers(text, font) {
 
 export function autoBold(text) {
   text = String(text);
-  text = text.replace(/\d/g, (match) => fonts.bold(match));
+  // text = text.replace(/\d/g, (match) => fonts.bold(match));
   text = text.replace(/\*\*\*(.*?)\*\*\*/g, (_, text) =>
     fonts.bold_italic(text),
   );

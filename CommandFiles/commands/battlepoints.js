@@ -1,16 +1,15 @@
 import { UNIRedux } from "../modules/unisym.js";
 
 export const meta = {
-  name: "balance",
-  description: "Displays your in-game balance.",
-  otherNames: ["bal", "coin", "money"],
+  name: "petpoints",
+  description: "Displays your in-game pet points.",
   version: "1.1.7",
   usage: "{prefix}{name}",
   category: "Utilities",
   author: "Liane Cagara | JenicaDev",
   permissions: [0],
   noPrefix: "both",
-  otherNames: ["bal", "coin", "cash", "money"],
+  otherNames: ["pts", "bp", "points"],
   waitingTime: 6,
 };
 
@@ -37,7 +36,7 @@ function formatNumber(number) {
 }
 
 export const style = {
-  title: "💰 Balance",
+  title: "💶 Pet Points",
   titleFont: "bold",
   content: {
     text_font: "fancy",
@@ -57,7 +56,7 @@ function isBrokenMoney(playerMoney) {
 function sortUsers(users, top) {
   let result = {};
   let sortedKeys = Object.keys(users).sort(
-    (a, b) => Number(users[b].money) - Number(users[a].money)
+    (a, b) => Number(users[b].battlePoints) - Number(users[a].battlePoints)
   );
   if (top) {
     sortedKeys = sortedKeys.slice(0, top);
@@ -108,11 +107,11 @@ export async function entry({
     if (isBrokenMoney(playerMoney)) {
       await money.set(input.senderID, { money: 0 });
       return output.reply(
-        `Your broken balance has been reset from ${pCy(playerMoney)} to 0$`
+        `Your broken pet points has been reset from ${pCy(playerMoney)} to 0$`
       );
     } else {
       return output.reply(
-        `Your balance is ${pCy(playerMoney)}$ and not broken at all.`
+        `Your pet points is ${pCy(playerMoney)}$ and not broken at all.`
       );
     }
   }
@@ -131,18 +130,18 @@ export async function entry({
     const formattedTopList = topList.map(([uid, data], index) => {
       const { name, money: userMoney, exp } = data;
 
-      return `${UNIRedux.arrow} ${index + 1}. ${name} 💰\n${
+      return `${UNIRedux.arrow} ${index + 1}. ${name} 💶\n${
         UNIRedux.arrowFromT
       } ${formatNumber(userMoney)}\n`;
     });
 
     const response = formattedTopList.length
-      ? `💰 Top 10 List:\n${formattedTopList.join("\n")}`
+      ? `💶 Top 10 List:\n${formattedTopList.join("\n")}`
       : "No data available for the top list.";
 
     return output.replyStyled(response, {
       ...style,
-      title: "🏆 Richest Balance",
+      title: "🏆 Richest Pet Points",
     });
   }
 
@@ -164,9 +163,9 @@ export async function entry({
         `${UNIRedux.arrow} ${name} is not yet registered in our system.`
       );
     }
-    const { name, money: userMoney } = hisData;
+    const { name, battlePoints: userMoney } = hisData;
 
-    output.reply(`${name} has ${pCy(userMoney ?? 0)} coins.`);
+    output.reply(`${name} has 💶${pCy(userMoney ?? 0)} pet points.`);
   } else {
     const data = await money.get(input.senderID);
     if (!data) {
@@ -174,8 +173,10 @@ export async function entry({
         `${UNIRedux.arrow} You are not yet registered in our system.`
       );
     }
-    const { name, money: userMoney } = data;
+    const { name, battlePoints: userMoney } = data;
 
-    output.reply(`${UNIRedux.arrow} You have ${pCy(userMoney ?? 0)} coins.`);
+    output.reply(
+      `${UNIRedux.arrow} You have 💶${pCy(userMoney ?? 0)} pet points.`
+    );
   }
 }

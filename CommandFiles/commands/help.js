@@ -24,6 +24,7 @@ export const meta = {
   otherNames: ["h"],
   icon: "🧰",
   noPrefix: "both",
+  waitingTime: 0.1,
 };
 const fonts = applyFonts;
 
@@ -35,14 +36,21 @@ export async function entry({ api, input, output, commands, prefix }) {
   const { body } = event;
   const [cmd, cmdName] = body.split(" ");
 
-  if (!cmdName) {
+  if (!cmdName || !isNaN(cmdName)) {
     let helpMessage = `╭─❍「 𝗡𝗶𝗰𝗮𝗕𝗼𝗧 」\n`;
 
     let cmdNum = 1;
-    const listedNames = [];
-    let totalCommands = 0;
 
-    Object.keys(commands).forEach((file) => {
+    const items = [
+      ...new Set(
+        Object.keys(commands).map((i) => String(commands[i].meta.name))
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+    let totalCommands = items.length;
+    const slicer = new Slicer(items, 10);
+    const page = Slicer.parseNum(cmdName);
+
+    slicer.getPage(page).forEach((file) => {
       const commandName = file;
       const command = commands[commandName];
 
@@ -55,30 +63,16 @@ export async function entry({ api, input, output, commands, prefix }) {
         return;
       }
 
-      if (input.isAdmin === false && command.meta.adminOnly === true) {
-        return;
-      }
-
       const { name, description } = command.meta;
-      if (listedNames.includes(name)) {
-        return;
-      }
+
       const displayName = Array.isArray(name) ? name[0] : name;
 
-      helpMessage += `│ │ ✧ ${fonts(displayName || "No Name", "bold_italic")}${command.meta.noPrefix ? " (no prefix) " : ""} ${command.meta.adminOnly ? "✨" : ""}\n`;
+      helpMessage += `│ │ ✧ ${fonts(displayName || "No Name", "bold_italic")}${
+        command.meta.noPrefix ? " (no prefix) " : ""
+      } ${command.meta.adminOnly ? "✨" : ""}\n`;
       command.meta.description
         ? (helpMessage += `│ ➤ ${command.meta.description}\n`)
         : null;
-
-      if (Array.isArray(name)) {
-        listedNames.push(name[0]);
-      } else {
-        listedNames.push(name);
-      }
-      if (command.meta.adminOnly) {
-        totalCommands--;
-      }
-      totalCommands++;
     });
 
     output.reply(
@@ -86,20 +80,21 @@ export async function entry({ api, input, output, commands, prefix }) {
         helpMessage +
           `├───────────⟡
 ├─❍「 𝗜𝗻𝗳𝗼 」
-│ ✧ ${prefix}help 「 name 」
+│ ✧ ${prefix}help 「 name | page 」
 │ ✧ Total: ${totalCommands}
+│ ✧ Page: ${page}/${slicer.pagesLength + 1}
 ├────────❍
 │ 𝗡𝗶𝗰𝗮𝗕𝗼𝗧 🎀💌
 ╰───────────⟡`,
-        "fancy",
-      ),
+        "fancy"
+      )
     );
   } else {
     const reqCmd = commands[cmdName];
 
     if (!reqCmd) {
       output.reply(
-        `The command '${input.arguments[0]}' does not exist in the loaded commands..`,
+        `The command '${input.arguments[0]}' does not exist in the loaded commands..`
       );
       return;
     }
@@ -135,16 +130,27 @@ export async function entry({ api, input, output, commands, prefix }) {
 │ ➤ @${version || "1.0.0"}
 │ │ ✧ Permission: 
 │ ➤ ${adminOnly ? "Bot Admin" : "Anyone"}
-│ │ ✧ ${noPM ? "Exclusive to threads only" : noGC ? "🚫 Exclusive to private messages only" : "No thread restrictions."}
+│ │ ✧ ${
+          noPM
+            ? "Exclusive to threads only"
+            : noGC
+            ? "🚫 Exclusive to private messages only"
+            : "No thread restrictions."
+        }
 │ │ ✧ Description:
 │ ➤ ${description || "There are no any descriptions."}
 │ │ ✧ Usage: 
-│ ➤ ${usage || "No usage provided"}${license ? "\n│ ✧ License:\n" + license : ""}
+│ ➤ ${String(usage || "No usage provided")
+          .replaceAll("{p}", prefix)
+          .replaceAll("{prefix}", prefix)
+          .replaceAll("{name}", name)}${
+          license ? "\n│ ✧ License:\n" + license : ""
+        }
 ├────────❍
 │ 𝗡𝗶𝗰𝗮𝗕𝗼𝗧 🎀💌
 ╰───────────⟡`,
-        "fancy",
-      ),
+        "fancy"
+      )
     );
   }
 }
