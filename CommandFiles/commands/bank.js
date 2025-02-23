@@ -31,15 +31,21 @@ function deductMoneyFromTopUsers(topUsers, amount) {
   return deductedUsers;
 }
 export const meta = {
-  name: "bank",
+  name: "nbank",
   version: "2.3.0",
-  author: "Liane Cagara",
+  author: "Liane Cagara | JenicaDev",
   waitingTime: 5,
   description: "Liane's Bank",
   category: "banking",
   noPrefix: "both",
-  otherNames: ["lb", "lianebank"],
+  otherNames: ["nb", "bank", "nicabank"],
   botAdmin: true,
+};
+
+export const style = {
+  title: "🏦 NicaBank™️",
+  titleFont: "bold_italic",
+  contentFont: "fancy",
 };
 
 export async function entry({
@@ -52,7 +58,7 @@ export async function entry({
 }) {
   const p = prefix;
   const { money: userMoney, name = "Chara" } = await usersData.get(
-    event.senderID,
+    event.senderID
   );
   async function loadAllBankData() {
     const allData = await usersData.getAll();
@@ -66,7 +72,7 @@ export async function entry({
   const user = String(event.senderID);
   const bankData = await loadAllBankData();
   //const lianeBank = "💰 𝓛𝓲𝓪𝓷𝓮 𝓑𝓪𝓷𝓴 💼";
-  const lianeBank = `💰 [font=double_struck]L i a n e B a n k[:font=double_struck] 💼`;
+  const lianeBank = ``;
   const getUserInfo = async (api, userID) => {
     try {
       if (String(userID) !== user) {
@@ -114,8 +120,10 @@ export async function entry({
       await Promise.all(
         topTen.map(async ([userID, data], index) => {
           const userData = await usersData.get(userID);
-          return `${index + start + 1}. ${userData.name ?? "Chara"}:\n Bal: $${data.bank}`;
-        }),
+          return `${index + start + 1}. ${userData.name ?? "Chara"}:\n Bal: $${
+            data.bank
+          }`;
+        })
       )
     ).join("\n\n")}`;
 
@@ -135,12 +143,12 @@ export async function entry({
   if (command === "deposit") {
     if (isNaN(amount) || amount <= 0) {
       return message.reply(
-        `${lianeBank}\n\n✧ Hello ${userName}! Please enter the amount you wish to deposit in the bank.\n\nMore Options:\n⦿ Balance`,
+        `✧ Hello ${userName}! Please enter the amount you wish to deposit in the bank.\n\nMore Options:\n⦿ Balance`
       );
     }
     if (userMoney < amount) {
       return message.reply(
-        `${lianeBank}\n\n✧ Hello ${userName}, The amount you wished is greater than your balance.\n\nMore Options:\n⦿ Balance`,
+        `✧ Hello ${userName}, The amount you wished is greater than your balance.\n\nMore Options:\n⦿ Balance`
       );
     }
 
@@ -151,19 +159,19 @@ export async function entry({
     });
 
     return message.reply(
-      `${lianeBank}\n\n✧ Congratulations ${userName}! ${amount}💵 has been deposited into your bank account.\n\nMore Options:\n⦿ Balance\n⦿ Bank Balance\n⦿ Bank Interest\n⦿ Bank Transfer`,
+      `✧ Congratulations ${userName}! ${amount}💵 has been deposited into your bank account.\n\nMore Options:\n⦿ Balance\n⦿ Bank Balance\n⦿ Bank Interest\n⦿ Bank Transfer`
     );
   } else if (command === "withdraw") {
     const balance = bankData[user].bank || 0;
 
     if (isNaN(amount) || amount <= 0) {
       return message.reply(
-        `${lianeBank}\n\n✧ Hello ${userName}! Please enter the amount you wish to withdraw from the bank.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance\n⦿ Bank Interest`,
+        `✧ Hello ${userName}! Please enter the amount you wish to withdraw from the bank.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance\n⦿ Bank Interest`
       );
     }
     if (amount > balance) {
       return message.reply(
-        `${lianeBank}\n\n✧ Hello ${userName}, the amount you wished is greater than your bank balance.\n\nMore Options:\n⦿ Bank Balance`,
+        `✧ Hello ${userName}, the amount you wished is greater than your bank balance.\n\nMore Options:\n⦿ Bank Balance`
       );
     }
     bankData[user].bank = balance - amount;
@@ -172,7 +180,7 @@ export async function entry({
       bankData: bankData[user],
     });
     return message.reply(
-      `${lianeBank}\n\n✧ Congratulations ${userName}! ${amount}💵 has been succesfully withdrawn from your bank account. Use it wisely! \n\nMore Options:\n⦿ Balance\n⦿ Bank Balance`,
+      `✧ Congratulations ${userName}! ${amount}💵 has been succesfully withdrawn from your bank account. Use it wisely! \n\nMore Options:\n⦿ Balance\n⦿ Bank Balance`
     );
   } else if (command === "dice") {
     const userDice = Math.floor(Math.random() * 6) + 1;
@@ -197,9 +205,7 @@ export async function entry({
       bankData: bankData[user],
     });
 
-    return message.reply(
-      `${lianeBank}\n\n✧ Let's roll the dice!\n\n${outcomeMessage}`,
-    );
+    return message.reply(`✧ Let's roll the dice!\n\n${outcomeMessage}`);
   } else if (command === "heist") {
     return message.reply(`🧪 This command is under maintenance.`);
     const lastHeistTime = bankData[user].lastHeistTime || 0;
@@ -210,11 +216,11 @@ export async function entry({
         const remainingTime = cooldown - (Date.now() - lastHeistTime);
         const hours = Math.floor(remainingTime / (60 * 60 * 1000));
         const minutes = Math.ceil(
-          (remainingTime % (60 * 60 * 1000)) / (60 * 1000),
+          (remainingTime % (60 * 60 * 1000)) / (60 * 1000)
         );
 
         return message.reply(
-          `${lianeBank}\n\n✧ Sorry ${userName}, you need to wait ${hours} hours and ${minutes} minutes before starting another heist.`,
+          `✧ Sorry ${userName}, you need to wait ${hours} hours and ${minutes} minutes before starting another heist.`
         );
       }
 
@@ -230,20 +236,20 @@ export async function entry({
           bankData: bankData[user],
         });
         return message.reply(
-          `${lianeBank}\n\n✧ Oops you got caught, ${userName}! Your bank heist was unsuccessful. You couldn't steal anything this time. However, 10% of the total heist amount has been added to your bank loan, ${loanAmount} has been deducted from your balance and bank balance`,
+          `✧ Oops you got caught, ${userName}! Your bank heist was unsuccessful. You couldn't steal anything this time. However, 10% of the total heist amount has been added to your bank loan, ${loanAmount} has been deducted from your balance and bank balance`
         );
       }
 
       const topUsers = getTopUsers(bankData, 5);
       const totalMoneyToDeduct = Math.floor(
-        Math.random() * (0.1 * getTotalMoney(topUsers)),
+        Math.random() * (0.1 * getTotalMoney(topUsers))
       );
       const deductedUsers = deductMoneyFromTopUsers(
         topUsers,
-        totalMoneyToDeduct,
+        totalMoneyToDeduct
       );
       const winAmount = Math.floor(
-        Math.random() * (0.1 * getTotalMoney(topUsers)),
+        Math.random() * (0.1 * getTotalMoney(topUsers))
       );
 
       bankData[user].bank += amountToSteal;
@@ -260,11 +266,11 @@ export async function entry({
       });
 
       return message.reply(
-        `${lianeBank}\n\n✧ Congratulations, ${userName}! You successfully completed a bank heist and stole ${amountToSteal}💵. You also won ${winAmount}💵.\n\n${deductedUsersMessage}`,
+        `✧ Congratulations, ${userName}! You successfully completed a bank heist and stole ${amountToSteal}💵. You also won ${winAmount}💵.\n\n${deductedUsersMessage}`
       );
     } else {
       return message.reply(
-        `${lianeBank}\n\n✧ Welcome, ${userName}! You are about to start a bank heist. Here's what you need to know:\n\n✧ If you win, you can steal a random amount between 1000 and 5000💵 from the bank, and you have a 35% chance of winning.\n\n✧ If you lose, 10% of the total heist amount will be added to your bank loan, regardless of the bank loan limit. There is a chance that you will lost all your cash and got negative cash! Proceed with caution. To confirm the heist, use the command "bank heist confirm".`,
+        `✧ Welcome, ${userName}! You are about to start a bank heist. Here's what you need to know:\n\n✧ If you win, you can steal a random amount between 1000 and 5000💵 from the bank, and you have a 35% chance of winning.\n\n✧ If you lose, 10% of the total heist amount will be added to your bank loan, regardless of the bank loan limit. There is a chance that you will lost all your cash and got negative cash! Proceed with caution. To confirm the heist, use the command "bank heist confirm".`
       );
     }
   } else if (command === "check") {
@@ -272,7 +278,7 @@ export async function entry({
 
     if (!userIDToCheck) {
       return message.reply(
-        `${lianeBank}\n\n✧ Hello ${userName}! Please provide a valid user ID to check their bank balance.`,
+        `✧ Hello ${userName}! Please provide a valid user ID to check their bank balance.`
       );
     }
 
@@ -281,11 +287,11 @@ export async function entry({
       const userDataToCheck = await usersData.get(userIDToCheck);
       const userNameToCheck = userDataToCheck.name;
       return message.reply(
-        `${lianeBank}\n\n✧ User: ${userNameToCheck}\n✧ Bank Balance: ${userBankBalance}💵`,
+        `✧ User: ${userNameToCheck}\n✧ Bank Balance: ${userBankBalance}💵`
       );
     } else {
       return message.reply(
-        `${lianeBank}\n\n✧ User with UID ${userIDToCheck} does not have a bank account.`,
+        `✧ User with UID ${userIDToCheck} does not have a bank account.`
       );
     }
   } else if (command === "balance") {
@@ -295,20 +301,20 @@ export async function entry({
         : 0;
 
     return message.reply(
-      `${lianeBank}\n\n✧ Greetings ${userName}!, Your bank account balance is ${balance}💵\n\n⦿ To earn interest. Type bank interest.\n\n⦿ To loan, Type bank loan <amount>`,
+      `✧ Greetings ${userName}!, Your bank account balance is ${balance}💵\n\n⦿ To earn interest. Type bank interest.\n\n⦿ To loan, Type bank loan <amount>`
     );
   } else if (command === "bet") {
     const betAmount = parseInt(args[1]);
     if (isNaN(betAmount) || betAmount <= 0) {
       return message.reply(
-        `${lianeBank}\n\n✧ Please enter a valid bet amount. You need to deposit a bank balance first to use your balance as the bet.`,
+        `✧ Please enter a valid bet amount. You need to deposit a bank balance first to use your balance as the bet.`
       );
     }
     const bankBal = bankData[user].bank || 0;
 
     if (bankBal < betAmount) {
       return message.reply(
-        `${lianeBank}\n\n✧ You don't have enough bank balance for this bet. Try to withdraw your bank balance.`,
+        `✧ You don't have enough bank balance for this bet. Try to withdraw your bank balance.`
       );
     }
 
@@ -349,7 +355,7 @@ export async function entry({
       winnings > 0
         ? `Congratulations! You won ${winnings}💵.`
         : `You lost ${betAmount}💵.`;
-    const responseMessage = `${lianeBank}\n\n ${slotResultText}\n\n✧ ${outcomeMessage}`;
+    const responseMessage = ` ${slotResultText}\n\n✧ ${outcomeMessage}`;
 
     return message.reply(responseMessage);
   } else if (command === "interest") {
@@ -373,24 +379,26 @@ export async function entry({
     });
 
     return message.reply(
-      `${lianeBank}\n\n✧ Congratulations ${userName}! You earned ${interestEarned.toFixed(2)}💵 of interest. It is successfully added into your bank balance.`,
+      `✧ Congratulations ${userName}! You earned ${interestEarned.toFixed(
+        2
+      )}💵 of interest. It is successfully added into your bank balance.`
     );
   } else if (command === "transfer") {
     return message.reply(`🧪 This command is under maintenance.`);
     const balance = bankData[user].bank || 0;
     if (isNaN(amount) || amount <= 0) {
       return message.reply(
-        `${lianeBank}\n\n✧ Hello ${userName}! Please enter the amount and the recipient ID of the user.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance\n⦿ UID`,
+        `✧ Hello ${userName}! Please enter the amount and the recipient ID of the user.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance\n⦿ UID`
       );
     }
     if (balance < amount) {
       return message.reply(
-        `${lianeBank}\n\n✧ Sorry ${userName}, The amount you want to transfer is greater than your bank balance.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance`,
+        `✧ Sorry ${userName}, The amount you want to transfer is greater than your bank balance.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance`
       );
     }
     if (!recipientUID || recipientUID === "undefined") {
       return message.reply(
-        `${lianeBank}\n\n✧ Hello ${userName}, Please enter the correct recipient ID.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance\n⦿ UID`,
+        `✧ Hello ${userName}, Please enter the correct recipient ID.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance\n⦿ UID`
       );
     }
     if (!bankData[recipientUID]) {
@@ -405,22 +413,22 @@ export async function entry({
       bankData: bankData[recipientUID],
     });
     return message.reply(
-      `${lianeBank}\n\n✧ Greetings ${userName}! The amount you wished has been successfully transfered!\n\n✧ Amount: ${amount}💵\n✧ Recipient ID: ${recipientUID}\n\n✧ Liane Bank ✅`,
+      `✧ Greetings ${userName}! The amount you wished has been successfully transfered!\n\n✧ Amount: ${amount}💵\n✧ Recipient ID: ${recipientUID}\n\n✧ Liane Bank ✅`
     );
   } else if (command === "loan") {
     if (isNaN(amount) || amount <= 0) {
       return message.reply(
-        `${lianeBank}\n\n✧ Hello ${userName}! Please enter the amount you wished to borrow.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance`,
+        `✧ Hello ${userName}! Please enter the amount you wished to borrow.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance`
       );
     }
     if (bankData[user].loan > 0) {
       return message.reply(
-        `${lianeBank}\n\n✧ Sorry ${userName} but you already had existing loan.\n\nMore Options:\n⦿ Bank Payloan\n⦿ Bank Balance`,
+        `✧ Sorry ${userName} but you already had existing loan.\n\nMore Options:\n⦿ Bank Payloan\n⦿ Bank Balance`
       );
     }
     if (amount > 1000000) {
       return message.reply(
-        `${lianeBank}\n\n✧ Sorry ${userName}, The maximum loan amount is 1000000.\n\nMore Options:\n⦿ Bank Payloan\n⦿ Bank Balance`,
+        `✧ Sorry ${userName}, The maximum loan amount is 1000000.\n\nMore Options:\n⦿ Bank Payloan\n⦿ Bank Balance`
       );
     }
     bankData[user].loan = amount;
@@ -431,7 +439,7 @@ export async function entry({
       bankData: bankData[user],
     });
     return message.reply(
-      `${lianeBank}\n\n✧ Hello ${userName}, You have successfully borrowed ${amount}💵, The loan amount will be deducted from your bank account balance after 1 week .\n\nMore Options:\n⦿ Bank Payloan\n⦿ Bank Balance`,
+      `✧ Hello ${userName}, You have successfully borrowed ${amount}💵, The loan amount will be deducted from your bank account balance after 1 week .\n\nMore Options:\n⦿ Bank Payloan\n⦿ Bank Balance`
     );
   } else if (command === "payloan") {
     const loan = bankData[user].loan || 0;
@@ -439,11 +447,11 @@ export async function entry({
 
     if (loan <= 0 || loanDueDate <= 0) {
       return message.reply(
-        `${lianeBank}\n\n✧ Sorry ${userName}, You do not have existing loan.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance`,
+        `✧ Sorry ${userName}, You do not have existing loan.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance`
       );
     }
     const daysLate = Math.ceil(
-      (Date.now() - loanDueDate) / (24 * 60 * 60 * 1000),
+      (Date.now() - loanDueDate) / (24 * 60 * 60 * 1000)
     );
     const interestRate = 0.002; // 0.01% per day
     const interest = loan * interestRate * daysLate;
@@ -451,17 +459,17 @@ export async function entry({
 
     if (isNaN(amount) || amount <= 0) {
       return message.reply(
-        `${lianeBank}\n\n✧ Welcome back ${userName}! Please enter the amount you wished to pay. The total amount due is ${totalAmountDue}💵.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance`,
+        `✧ Welcome back ${userName}! Please enter the amount you wished to pay. The total amount due is ${totalAmountDue}💵.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance`
       );
     }
     if (amount > userMoney) {
       return message.reply(
-        `${lianeBank}\n\n✧ Sorry ${userName}, You do not have enough money to pay the existing loan.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance`,
+        `✧ Sorry ${userName}, You do not have enough money to pay the existing loan.\n\nMore Options:\n⦿ Bank Balance\n⦿ Balance`
       );
     }
     if (amount < totalAmountDue) {
       return message.reply(
-        `${lianeBank}\n\n✧ Sorry ${userName}, The amount you entered is less then the total amount due which is ${totalAmountDue}💵.\n\nMore Options:\n⦿ Bank Balance\n⦿ Bank Payloan`,
+        `✧ Sorry ${userName}, The amount you entered is less then the total amount due which is ${totalAmountDue}💵.\n\nMore Options:\n⦿ Bank Balance\n⦿ Bank Payloan`
       );
     }
     bankData[user].loan = 0;
@@ -472,11 +480,13 @@ export async function entry({
       bankData: bankData[user],
     });
     return message.reply(
-      `${lianeBank}\n\n✧ Congatulations ${userName}, You have paid your loan of ${loan}💵 plus interest of ${interest.toFixed(2)} $. The total amount paid is ${totalAmountDue}💵.\n\nMore Options:\n⦿ Bank Balance\n⦿ Bank Loan`,
+      `✧ Congatulations ${userName}, You have paid your loan of ${loan}💵 plus interest of ${interest.toFixed(
+        2
+      )} $. The total amount paid is ${totalAmountDue}💵.\n\nMore Options:\n⦿ Bank Balance\n⦿ Bank Loan`
     );
   } else {
     return message.reply(
-      `${lianeBank}\n✧ Hello ${userName}! Please use one of our services✧\n\n⦿ Bank Balance\n⦿ Bank Deposit\n⦿ Bank Withdraw\n⦿ Bank Interest\n⦿ Bank Transfer\n⦿ Bank Loan\n⦿ Bank Richest\n⦿ Bank Heist (new)\n⦿ Bank Bet (new)\n⦿ Bank Dice (new)\n⦿ Bank Check (new)`,
+      `${lianeBank}\n✧ Hello ${userName}! Please use one of our services✧\n\n⦿ Bank Balance\n⦿ Bank Deposit\n⦿ Bank Withdraw\n⦿ Bank Interest\n⦿ Bank Transfer\n⦿ Bank Loan\n⦿ Bank Richest\n⦿ Bank Heist (new)\n⦿ Bank Bet (new)\n⦿ Bank Dice (new)\n⦿ Bank Check (new)`
     );
   }
 }

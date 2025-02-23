@@ -313,16 +313,16 @@ const closeTexts = [
 ];
 
 export async function entry({ UTShop, isTimeAvailable, output }) {
-  const a = 12 * 60 * 60 * 1000;
-  const b = (5 + 12) * 60 * 60 * 1000;
-  let isAvailable = isTimeAvailable(a, b);
-  if (!isAvailable) {
-    return output.reply(`✦ ${
-      closeTexts[Math.floor(Math.random() * closeTexts.length)]
-    }
+//   const a = 12 * 60 * 60 * 1000;
+//   const b = (5 + 12) * 60 * 60 * 1000;
+//   let isAvailable = isTimeAvailable(a, b);
+//   if (!isAvailable) {
+//     return output.reply(`✦ ${
+//       closeTexts[Math.floor(Math.random() * closeTexts.length)]
+//     }
 
-**Go back next time**`);
-  }
+// **Go back next time**`);
+//   }
   const shop = new UTShop(meowShop);
   return shop.onPlay();
 }

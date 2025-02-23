@@ -171,9 +171,7 @@ export async function entry({ ...ctx }) {
           );
           let cache1 = [];
           for (const [category, items] of sorted) {
-            itemList += `☆ [font=fancy_italic]${String(category)
-              .toUpperCase()
-              .replaceAll("_", " ")}[:font=fancy_italic]\n\n`;
+            itemList += ``;
 
             const itemCounts = new Map();
 
@@ -189,9 +187,9 @@ export async function entry({ ...ctx }) {
             itemList += Array.from(itemCounts.entries())
               .map(([key, count]) => {
                 const item = items.find((item) => item.key === key);
-                return `${item.icon}${count > 1 ? ` **x${count}**` : ""} ${
-                  item.name
-                } (${item.key})`;
+                return `${item.icon} **${item.name}**${
+                  count > 1 ? ` (x${count}) ` : ""
+                } [${item.key}]`;
               })
               .join("\n");
 
@@ -212,15 +210,13 @@ export async function entry({ ...ctx }) {
             a[0].localeCompare(b[0])
           );
           for (const [category, items] of sorted2) {
-            cllList += `☆ [font=fancy_italic]${String(category)
-              .toUpperCase()
-              .replaceAll("_", " ")}[:font=fancy_italic]\n\n`;
+            cllList += ``;
             cllList += items
               .map(
                 ({ metadata, amount }) =>
-                  `${metadata.icon} ${
-                    amount > 1 ? `**x${pCy(amount)}**` : ""
-                  } ${metadata.name} (${metadata.key})`
+                  `${metadata.icon} **${metadata.name}**${
+                    amount > 1 ? ` (x${pCy(amount)}) ` : ""
+                  }[${metadata.key}]`
               )
               .join("\n");
             cllList += "\n\n";
@@ -229,13 +225,13 @@ export async function entry({ ...ctx }) {
             (otherTarget
               ? `✅ Checking ${otherTarget.name ?? "Unregistered"}\n\n`
               : "") +
-            `💼 **Classic Items** ✦ **${
+            `👤 **${userData.name}** (**${
               inventory.getAll().length
-            }/${invLimit}** (${Math.floor(
-              (inventory.size() / invLimit) * 100
-            )}%)\n\n${itemList.trim() || "No items available."}\n\n${
-              UNIRedux.standardLine
-            }\n🗝️ **Collectibles** ✦ Unlimited (UNLI%)\n\n${cllList.trim()}`;
+            }/${invLimit}**)\n\n${UNIRedux.arrow} ***Items***\n\n${
+              itemList.trim() || "No items available."
+            }\n\n${UNIRedux.standardLine}\n${
+              UNIRedux.arrow
+            } ***Collectibles***\n\n${cllList.trim()}`;
           /**
            * @type {typeof extensions}
            */

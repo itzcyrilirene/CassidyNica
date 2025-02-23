@@ -208,7 +208,7 @@
     "lastGiftClaim": 1739539533452
   },
   "wss:admin": {
-    "money": 100000,
+    "money": 101400,
     "exp": 0,
     "name": "Admin",
     "virtualFiles": {
@@ -230,11 +230,31 @@
         }
       ]
     },
-    "lastModified": 1740315761404,
-    "inventory": [],
-    "lastGiftClaim": 1739605261527,
+    "lastModified": 1740319464827,
+    "inventory": [
+      {
+        "name": "Gift",
+        "icon": "🎁",
+        "flavorText": "This is a gift item, this item might grant you something. It's not guaranteed enough, you can use this using inventory command, if you know..",
+        "sellPrice": 100,
+        "type": "treasure",
+        "treasureKey": "generic",
+        "key": "gift",
+        "cannotSend": true
+      }
+    ],
+    "lastGiftClaim": 1740319462226,
     "fishStamp": 1735977461906,
     "collectibles": [
+      {
+        "metadata": {
+          "key": "gems",
+          "name": "Daily Gems",
+          "icon": "💎",
+          "type": "currency"
+        },
+        "amount": 16
+      },
       {
         "metadata": {
           "key": "feudTickets",
@@ -243,19 +263,10 @@
           "type": "hardWork"
         },
         "amount": 0
-      },
-      {
-        "metadata": {
-          "key": "gems",
-          "name": "Daily Gems",
-          "icon": "💎",
-          "type": "currency"
-        },
-        "amount": 1
       }
     ],
-    "lastDailyClaim": 1738990851433,
-    "battlePoints": 10,
+    "lastDailyClaim": 1740319464826,
+    "battlePoints": 160,
     "cassExpress": {
       "mailList": [
         {
@@ -263,12 +274,18 @@
           "timeStamp": 1738990851434,
           "title": "Daily Reward Claimed",
           "author": "wss:admin"
+        },
+        {
+          "body": "Congratulations **Admin** for claiming your daily reward!",
+          "timeStamp": 1740319464827,
+          "title": "Daily Reward Claimed",
+          "author": "wss:admin"
         }
       ],
       "bankLogs": []
     },
     "cassEXP": {
-      "exp": 5
+      "exp": 80
     },
     "ndrive": {
       "name": "Kiwi Berries",
@@ -333,12 +350,13 @@
       "premium": false
     },
     "shopInv": {
-      "pet": true
+      "pet": true,
+      "harvest": true
     }
   },
   "test": {
     "money": 0,
     "exp": 0,
-    "lastModified": 1740318206097
+    "lastModified": 1740319440446
   }
 }
