@@ -47,7 +47,9 @@ cmd.run = async function ({ event, args }) {
       if (command?.config) {
         message += `${number}.「 ${command.config.usePrefix ? PREFIX : ""}${
           command.config.name
-        } 」\n`;
+        } 」\nDescription: ${
+          command.config.description ?? "No Description"
+        }\nAuthor: ${command.config.author ?? "No Author"}\n\n`;
       }
     } catch (error) {
       // Ignore errors because if the developer does not even bother making a global cache for commands instead of require() every time, why would it bother handle the errors?
