@@ -39,7 +39,7 @@ export const meta = {
   category: "banking",
   noPrefix: "both",
   otherNames: ["nb", "bank", "nicabank"],
-  botAdmin: true,
+  // botAdmin: true,
 };
 
 export const style = {

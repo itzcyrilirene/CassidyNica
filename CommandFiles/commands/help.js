@@ -45,7 +45,17 @@ export async function entry({ api, input, output, commands, prefix }) {
       ...new Set(
         Object.keys(commands).map((i) => String(commands[i].meta.name))
       ),
-    ].sort((a, b) => a.localeCompare(b));
+    ]
+      .sort((a, b) => a.localeCompare(b))
+      .filter(
+        (name) =>
+          (!input.isAdmin &&
+            !Object.values(commands).some(
+              (cmd) => cmd.meta.name === name && cmd.meta.botAdmin === true
+            )) ||
+          input.isAdmin
+      );
+
     let totalCommands = items.length;
     const slicer = new Slicer(items, 10);
     const page = Slicer.parseNum(cmdName);
@@ -69,7 +79,7 @@ export async function entry({ api, input, output, commands, prefix }) {
 
       helpMessage += `│ │ ✧ ${fonts(displayName || "No Name", "bold_italic")}${
         command.meta.noPrefix ? " (no prefix) " : ""
-      } ${command.meta.adminOnly ? "✨" : ""}\n`;
+      } ${command.meta.botAdmin ? "✨" : ""}\n`;
       command.meta.description
         ? (helpMessage += `│ ➤ ${command.meta.description}\n`)
         : null;

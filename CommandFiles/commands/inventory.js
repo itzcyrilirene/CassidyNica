@@ -188,7 +188,7 @@ export async function entry({ ...ctx }) {
               .map(([key, count]) => {
                 const item = items.find((item) => item.key === key);
                 return `${item.icon} **${item.name}**${
-                  count > 1 ? ` (x${count}) ` : ""
+                  count > 1 ? ` (x${count})` : ""
                 } [${item.key}]`;
               })
               .join("\n");
@@ -214,8 +214,8 @@ export async function entry({ ...ctx }) {
             cllList += items
               .map(
                 ({ metadata, amount }) =>
-                  `${metadata.icon} **${metadata.name}**${
-                    amount > 1 ? ` (x${pCy(amount)}) ` : ""
+                  `${metadata.icon} **${metadata.name}** ${
+                    amount > 1 ? `(x${pCy(amount)}) ` : ""
                   }[${metadata.key}]`
               )
               .join("\n");
