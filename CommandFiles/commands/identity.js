@@ -22,7 +22,7 @@ export const meta = {
 const { parseCurrency: pCy } = global.utils;
 
 export const style = {
-  title: "Identity Dashboard 💬",
+  title: "Identity 👤",
   titleFont: "bold",
   contentFont: "none",
 };
@@ -99,91 +99,25 @@ const home = new ReduxCMDHome(
         CassExpress,
         prefix,
       }) {
-        const userData = await money.get(input.senderID);
+        const allData = await money.getAll();
+        const userData = allData[input.senderID] ?? { ...money.defaults };
         let isRequire = !!userData.name;
-        const name = args.join(" ");
-        const inventory = new Inventory(userData.inventory);
-        const cassExpress = new CassExpress(userData.cassExpress ?? {});
-        if (!inventory.has("nameChanger") && isRequire) {
-          return output.reply(
-            "A 🎟️ **Name Changer** is required for this action."
-          );
-        }
+        const name = args[0];
+
         if (!name || name.length > 20) {
           return output.reply(
-            `❌ Please enter a valid name (lower than 20 characters)\n\n***Example***: ${prefix}id-setname Liane`
+            `❌ | Enter a name longer than 20 characters.\n\nExample: ${prefix}changeuser Nicaa`
           );
         }
-        const names = {
-          chara: "The true name.",
-          frisk: "This name will trigger hardmode, proceed anyway?",
-          sans: "You cannot use this name.",
-          papyrus: "Are you kidding me? You cannot use this name.",
-          alphys: "Can you atleast find your original name",
-          undyne: "Very original.",
-          toriel: "You are not goat mom!",
-          asgore: "You are not goat dad!",
-          martlet: "You are not a royal guard.",
-          clover: "AMERICA! AMERICA!",
-          ceroba: "You are not a fox.",
-          liane: "Nice try.",
-          nea: "Queen Nean is tired of licensing her name.",
-          nean: "It's nea, but worse",
-          kaye: "Just.. don't use this name",
-          asriel: "You are nor goat prince.",
-          starlo: "No america for you.",
-          flowey: "Stfu.",
-          sand: "I will let this one slide",
-          papyru: "It doesn't have s, so proceed anyway.",
-          muffet: "No no no spiders for now",
-          mettaton: "I'm not a robot.",
-          mtt: "No way, he used MTT, mettaton will gonna be mad.",
-          axis: "Sorry human but you don't [freaking] deserve this name.",
-          chujin: "Steamworks..",
-          kanako: "Okay nevermind.",
-          get gaster() {
-            const err = {};
-            err.stack = "system:sound_test";
-            err.name = "Uknown";
-            err.message =
-              "Unknown issue. Beware of the man who speaks in hands.";
-            throw err;
-          },
-        };
-        const allowed = ["chara", "frisk", "clover", "sand", "papyru"];
-        if (
-          !names[name.toLowerCase()] ||
-          !Object.keys(names).some((i) =>
-            name.toLowerCase().includes(i.toLowerCase())
-          )
-        ) {
-          allowed.push(name.toLowerCase());
+
+        if (Object.values(allData).some((i) => i.name === name)) {
+          return output.reply(`❌ | User with the same name already exists.`);
         }
-        const nameOk = allowed.includes(name.toLowerCase());
-        let proceed = isRequire ? `Proceed for 1 🎟️` : `Proceed (Free 1st)`;
-        const i = await output.reply(
-          `${UNIRedux.charm} ${
-            names[name] || names[name.toLowerCase()] || "Is the name correct?"
-          }\n\n**${name.split("").join(" ")}**\n\n${
-            nameOk
-              ? `🔍 Please reply **'proceed'** without prefix if the name is correct.${
-                  isRequire
-                    ? "\n⚠️ This will cost you 1 🎟️ **Name Changer** item."
-                    : "\n🎁 Your first name change is **free**."
-                }`
-              : "❌ You cannot use this name. Please select a different one."
-          }\n\n🎟️ **${inventory.getAmount("nameChanger")}**`
-        );
-        input.setReply(i.messageID, {
-          key: "changename",
-          isRequire,
+        await money.set(input.senderID, {
           name,
-          userData,
-          inventory,
-          author: input.senderID,
-          detectID: i.messageID,
-          callback: replySet,
         });
+
+        return output.reply(`✅ | Successfully changed your name to "${name}"`);
       },
     },
     {
@@ -266,33 +200,4 @@ const home = new ReduxCMDHome(
 
 export async function entry(ctx) {
   return home.runInContext(ctx);
-}
-async function replySet({ input, output, repObj, money }) {
-  try {
-    if (repObj.author !== input.senderID) {
-      return output.replyStyled(`This is not your name change request.`, style);
-    }
-    const { name, userData, inventory, author } = repObj;
-    if (input.words[0] === "back") {
-      return output.replyStyled(`It's okay, go back!`, style);
-    }
-    if (!input.body.toLowerCase().startsWith("proceed")) {
-      return;
-    }
-    inventory.deleteOne("nameChanger");
-    userData.inventory = Array.from(inventory);
-    userData.name = name;
-    input.delReply(repObj.detectID);
-    await money.set(author, {
-      inventory: userData.inventory,
-      name: userData.name,
-    });
-    return output.replyStyled(
-      `✅ Successfully changed your name to "${name}"`,
-      style
-    );
-  } catch (error) {
-    console.error(error);
-    output.error(error);
-  }
 }

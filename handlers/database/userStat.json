@@ -208,9 +208,9 @@
     "lastGiftClaim": 1739539533452
   },
   "wss:admin": {
-    "money": 101400,
+    "money": 113700,
     "exp": 0,
-    "name": "Admin",
+    "name": "NicaPanel",
     "virtualFiles": {
       "mainDir": [
         {
@@ -230,7 +230,7 @@
         }
       ]
     },
-    "lastModified": 1740319464827,
+    "lastModified": 1740496309167,
     "inventory": [
       {
         "name": "Gift",
@@ -352,11 +352,12 @@
     "shopInv": {
       "pet": true,
       "harvest": true
-    }
+    },
+    "diceWins": 3
   },
   "test": {
     "money": 0,
     "exp": 0,
-    "lastModified": 1740320163163
+    "lastModified": 1740496212614
   }
 }
