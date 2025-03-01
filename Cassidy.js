@@ -146,7 +146,7 @@ global.Cassidy = {
   },
   // invLimit: 36,
   invLimit: 36,
-  highRoll: 10_000_000,
+  highRoll: Number.MAX_SAFE_INTEGER,
   presets: new Map(),
   loadCommand,
   loadPlugins,
@@ -156,6 +156,7 @@ global.Cassidy = {
   accessToken: null,
   redux: true,
 };
+
 const login = require(global.Cassidy.config.FCA.path);
 
 global.allPlugins = allPlugins;
@@ -264,7 +265,7 @@ async function loadAllCommands(callback = async () => {}) {
   Object.keys(require.cache).forEach((i) => {
     delete require.cache[i];
   });
-  await registeredExtensions.downloadRemoteExtensions();
+  // await registeredExtensions.downloadRemoteExtensions();
 
   const commandPromises = fileNames.map(async (fileName) => {
     try {

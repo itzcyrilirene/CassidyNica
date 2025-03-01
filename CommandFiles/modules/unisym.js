@@ -27,8 +27,7 @@ export function emojiEnd(str) {
   // const res =
   //   nonEmojis + " " + UNIRedux.charm + "" + (emojis ? " " + emojis : "");
 
-  const res =
-    `` + String((emojis ? `${emojis} |` : "") + " " + nonEmojis).trim();
+  const res = `` + String((emojis ? `${emojis}` : "") + " " + nonEmojis).trim();
   console.log(str, " => ", res);
   return res;
 }

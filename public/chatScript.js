@@ -62,8 +62,12 @@ window.onload = async () => {
     }
   }
 
-  const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws`);
+  function loadWs() {
+    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws`);
+  }
+
+  loadWs();
   const ccc = document.querySelector("#ccc");
   // You can freely customize this ws.onopen, just make sure it doesn't do stuffs that may break the page :)
 
@@ -96,8 +100,19 @@ window.onload = async () => {
     }
   };
   ws.onclose = () => {
-    //window.location.href = window.location.href;
+    window.location.href = window.location.href;
     // Lmao refresh
+    // appendSend({
+    //   message: "[ Restarting Connection... ]",
+    //   chatPad,
+    // });
+    // loadWs();
+    // ws.addEventListener("open", () => {
+    //   appendSend({
+    //     message: "[ Connection restarted! ]",
+    //     chatPad,
+    //   });
+    // });
   };
   // Get the chatPad, I don't want to type it every time lmao
   const chatPad = document.getElementById("chatPad");

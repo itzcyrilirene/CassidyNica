@@ -1,146 +1,88 @@
-const fruits = ["🍒", "🍎", "🍓", "🍌", "🍊", "🍇", "🍐", "🍋"];
-
 export const meta = {
-  name: "slot",
-  description: "Play the slot machine game",
-  author: "Liane Cagara",
-  version: "1.1.9",
+  name: "slots",
+  description: "Play a slot game and try your luck!",
+  author: "JenicaDev",
+  version: "1.0.1",
   usage: "{prefix}{name} <bet>",
   category: "Gambling Games",
   permissions: [0],
   noPrefix: "both",
-  waitingTime: 30,
-  shopPrice: 1000,
+  otherNames: ["slot"],
+  waitingTime: 5,
   requirement: "2.5.0",
   icon: "🍒",
 };
-const { randArrValue } = global.utils;
-
-const highRollPass = {
-  name: "HighRoll Pass",
-  key: "highRollPass",
-  flavorText:
-    "A pass won by achieving a 7-win streak in slots. This pass allows you to place slot bets over 100000, unlocking bigger wins and higher stakes. Remember, with great risk comes great reward. Surprisingly easy to toss away like a normal item!",
-  icon: "🃏",
-  sellPrice: 2500000,
-  type: "armor",
-  def: 15,
+export const style = {
+  title: "🎰 Slot Game",
+  titleFont: "bold",
+  contentFont: "fancy",
 };
-global.items.push(highRollPass);
-
-export async function entry({
-  input,
-  output,
-  money,
-  icon,
-  cancelCooldown,
-  Inventory,
-}) {
-  const [bet] = input.arguments;
-  const senderID = input.senderID;
-  let {
-    money: playerMoney,
-    slotWins = 0,
-    slotLooses = 0,
-    winStreak = 0,
-    inventory,
-    slotLuck = false,
-  } = await money.get(senderID);
-  if (slotLuck) {
-    cancelCooldown();
-  }
-  inventory = new Inventory(inventory);
-  const top = `𝖲𝗅𝗈𝗍 𝖱𝖾𝗌𝗎𝗅𝗍 | •~•`;
-  const bottom = `𝗬𝗼𝘂 𝘄𝗼𝗻: x$
-𝗬𝗼𝘂 𝗹𝗼𝘀𝘁: y$`;
-  let isBad = slotWins - slotLooses < 0;
-
-  if (!bet || isNaN(bet) || bet <= 0 || bet > playerMoney) {
-    output.reply(
-      `${icon}\n\nInvalid bet amount. Your current balance is ${playerMoney}$.
-
-**Total ${isBad ? `Looses` : `Wins`}:** ${Math.abs(slotWins - slotLooses)}$`
-    );
-    cancelCooldown();
-    return;
-  }
-  let hasPass = inventory.has(highRollPass.key);
-  if (!hasPass && bet > global.Cassidy.highRoll) {
-    return output.reply(
-      `${icon}\n\nYou need a **HighRoll Pass** 🃏 to place bets over ${global.Cassidy.highRoll}$`
-    );
-  }
-  if (bet > playerMoney * 0.75) {
-    return output.reply(
-      `${icon}\n\nYou cannot bet more than 75% of your balance.`
-    );
-  }
-  let result;
-  let same = 0;
-  const multipliers = {
-    0: 0,
-    1: 2,
-    2: 3,
-  };
-  do {
-    result = [randArrValue(fruits), randArrValue(fruits), randArrValue(fruits)];
-
-    for (let i = 0; i < result.length; i++) {
-      const currFruit = result[i];
-      const hasMatchingFruit = result
-        .slice(i + 1)
-        .some((fruit) => fruit === currFruit);
-      if (hasMatchingFruit) {
-        same++;
-      }
+/**
+ * @type {CommandEntry}
+ */
+export async function entry({ input, output, money: botData, cancelCooldown }) {
+  try {
+    const bet = parseInt(input.arguments[0]);
+    if (isNaN(bet) || bet <= 0) {
+      cancelCooldown();
+      await output.reply(`Please enter a valid bet larger than 0.`);
+      return;
     }
-  } while (slotLuck && same === 0 && bet % 2 !== 0);
-  const multiplier = multipliers[same];
-  let isWinPass = false;
-  if (same) {
-    winStreak++;
-    if (
-      !inventory.has(highRollPass.key) &&
-      inventory.has("cardBook") &&
-      winStreak >= 7
+    const { money: userMoney } = await botData.get(input.senderID);
+    if (bet > userMoney) {
+      cancelCooldown();
+      await output.reply(`You don't have enough money to make this bet!`);
+      return;
+    }
+    const fruits = [
+      ...new Set([
+        "🍎",
+        "🍊",
+        "🍌",
+        "🍒",
+        "🍇",
+        "🍒",
+        "🍋",
+        "🍊",
+        "💀",
+        "✨",
+        "🚀",
+        "👑",
+      ]),
+    ];
+
+    const result = [];
+    for (let i = 0; i < 3; i++) {
+      const randomFruit = fruits[Math.floor(Math.random() * fruits.length)];
+      result.push(randomFruit);
+    }
+
+    let wins = 0;
+
+    let winMessage = "";
+    if (result[0] === result[1] && result[1] === result[2]) {
+      const winAmount = bet * 3;
+      wins += winAmount;
+      winMessage = `Congratulations! You won ${winAmount} coins!`;
+    } else if (
+      result[0] === result[1] ||
+      result[1] === result[2] ||
+      result[0] === result[2]
     ) {
-      inventory.addOne(highRollPass);
-      inventory.deleteOne("cardBook");
-      isWinPass = true;
+      const winAmount = bet * 2;
+      wins += winAmount;
+      winMessage = `You won ${winAmount} coins!`;
+    } else {
+      wins -= bet;
+      winMessage = `Sorry, you didn't win. ${bet} coins have been deducted.`;
     }
-  } else if (winStreak > 0) {
-    winStreak--;
+
+    const resultMessage = `Slot Result: ${result.join(" | ")}`;
+    await botData.set(input.senderID, {
+      money: userMoney + wins,
+    });
+    await output.reply(`${resultMessage}\n${winMessage}`);
+  } catch (error) {
+    return output.error(error);
   }
-  const won = bet * multiplier;
-  const lost = !same ? bet : 0;
-  slotWins += Number(same ? won : 0);
-  slotLooses += Number(same ? 0 : lost);
-  isBad = slotWins - slotLooses < 0;
-
-  output.reply(`${icon}
-
-${top}
-
-{ ${result.join(" , ")} }
-
-${bottom.replace(/x/, won).replace(/y/, lost)}
-
-**Total ${isBad ? `Looses` : `Wins`}:** ${Math.abs(slotWins - slotLooses)}$
-**Win Streak:** ${winStreak}${winStreak > 7 ? "" : "/7"}${
-    isWinPass ? "\n🃏 You won a **HighRoll** pass!" : ""
-  }`);
-  await money.set(senderID, {
-    money: playerMoney + won - lost,
-    slotWins,
-    slotLooses,
-    winStreak,
-    inventory: Array.from(inventory),
-  });
 }
-
-/*𝖲𝗅𝗈𝗍 𝖱𝖾𝗌𝗎𝗅𝗍 | •~•
-
-{ 🍊 , 🍓 , 🍇 }
-
-𝗬𝗼𝘂 𝘄𝗼𝗻: 0$
-𝗬𝗼𝘂 𝗹𝗼𝘀𝘁: 5000$*/
