@@ -1,3 +1,4 @@
+// @ts-check
 export const meta = {
   name: "roll",
   version: "2.0.0",
@@ -57,10 +58,10 @@ export async function entry({ input, output, money: botData, cancelCooldown }) {
     );
   }
 
-  if (isNaN(times) || times < 1 || times > 30) {
+  if (isNaN(times) || times < 1 || times > 10) {
     cancelCooldown();
     return output.reply(
-      "Please enter a valid number of dice as second argument (1-30). The more dice, the more risk!"
+      "Please enter a valid number of dice as second argument (1-10). The more dice, the more risk!"
     );
   }
 
@@ -77,36 +78,40 @@ export async function entry({ input, output, money: botData, cancelCooldown }) {
       `You don't have enough coins to bet ${bet * times} coins.`
     );
   }
-
-  let playerResults = [];
-  let aiResults = [];
+  let winTexts = [];
   let totalWin = 0;
   let totalLoss = 0;
 
   for (let i = 0; i < times; i++) {
     const playerRoll = Math.floor(Math.random() * 6) + 1;
     const aiRoll = Math.floor(Math.random() * 6) + 1;
+    let isWin = playerRoll > aiRoll;
+    let isLoss = playerRoll < aiRoll;
 
-    playerResults.push(getDiceSymbol(playerRoll));
-    aiResults.push(getDiceSymbol(aiRoll));
+    winTexts.push(
+      `${getDiceSymbol(playerRoll)} ${
+        isWin ? "✅" : isLoss ? "❌" : "🟰"
+      } ${getDiceSymbol(aiRoll)} | ${
+        isWin ? `+${bet}$` : isLoss ? `-${bet}$` : "-0"
+      }`
+    );
 
-    if (playerRoll > aiRoll) {
-      totalWin += bet * 2; // Win double the bet per dice
-    } else if (playerRoll < aiRoll) {
-      totalLoss += bet; // Lose the base bet per dice
+    if (isWin) {
+      totalWin += bet;
+    } else if (isLoss) {
+      totalLoss += bet;
     }
   }
 
-  // Update player money
   const finalBalance = money + totalWin - totalLoss;
   await botData.set(input.senderID, {
     money: finalBalance,
     diceWins: (diceWins ?? 0) + (totalWin > 0 ? 1 : 0),
   });
 
-  let resultMessage = `🎲 **Your Rolls:** ${playerResults.join(
-    " "
-  )}\n🤖 **AI Rolls:** ${aiResults.join(" ")}\n\n`;
+  let resultMessage = `🎲 **Your Rolls** (left)\n🤖 **AI Rolls:** (right)\n\n${winTexts.join(
+    "\n"
+  )}\n\n`;
 
   if (totalWin > totalLoss) {
     resultMessage += `🎉 You won **${totalWin - totalLoss}** coins!`;
@@ -121,7 +126,6 @@ export async function entry({ input, output, money: botData, cancelCooldown }) {
   output.reply(resultMessage);
 }
 
-// Function to get dice symbols
 function getDiceSymbol(number) {
   const diceSymbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
   return diceSymbols[number - 1];

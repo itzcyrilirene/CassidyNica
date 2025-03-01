@@ -208,7 +208,7 @@
     "lastGiftClaim": 1739539533452
   },
   "wss:admin": {
-    "money": 113700,
+    "money": 113620,
     "exp": 0,
     "name": "NicaPanel",
     "virtualFiles": {
@@ -230,7 +230,7 @@
         }
       ]
     },
-    "lastModified": 1740496309167,
+    "lastModified": 1740813822635,
     "inventory": [
       {
         "name": "Gift",
@@ -353,11 +353,11 @@
       "pet": true,
       "harvest": true
     },
-    "diceWins": 3
+    "diceWins": 8
   },
   "test": {
     "money": 0,
     "exp": 0,
-    "lastModified": 1740496212614
+    "lastModified": 1740813635261
   }
 }
