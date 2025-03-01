@@ -105,6 +105,7 @@ export const entryConfig = {
   },
   async cmd(context) {
     const { input, output, args, money, prefix } = context;
+    return output.reply(`❌ Please use ${prefix}buy instead.`);
     if (args[0] === "buy") {
       if (!args[1]) {
         return output.reply(

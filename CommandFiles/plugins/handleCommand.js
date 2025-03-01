@@ -269,11 +269,16 @@ export async function use(obj) {
           obj.thisPrice = price;
           return shopLocked(obj);
         }
-        let text = `🔒 | The command "${meta.name}" is available in the **shop** with a price of ${price}$`;
+        let text = `📝 **Command Available:** "${meta.name}"\n💲 Price: **$${price}**`;
+
         if (isAffordable) {
-          text += `\n\n✨ You have enough money to **purchase** this command!\n\n**Example**: ${prefix}shop-cmd buy ${meta.name}`;
+          text += `\n\n✅ **You have enough funds to get this command!**\n⚡ Use **+buy ${meta.name}** to add it now!`;
+        } else {
+          text += `\n\n❌ **Not enough funds!** Earn more to get this command. 💼`;
         }
+
         await output.reply(text);
+
         return;
       }
     }

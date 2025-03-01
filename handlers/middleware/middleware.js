@@ -108,7 +108,7 @@ async function handleMiddleWare({
   let pluginCount = 0;
 
   try {
-    let prefixes = ["/", prefix, ...global.Cassidy.config.EXTRAPREFIX];
+    let prefixes = ["!", prefix, ...global.Cassidy.config.EXTRAPREFIX];
     if (Array.isArray(event.prefixes)) {
       prefixes = [...event.prefixes];
       prefix = prefixes[0];

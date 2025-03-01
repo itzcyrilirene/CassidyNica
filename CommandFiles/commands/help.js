@@ -119,15 +119,13 @@ export async function entry({ api, input, output, commands, prefix }) {
       adminOnly,
       noPM,
       noGC,
+      otherNames: a,
     } = reqCmd.meta;
     let displayName = Array.isArray(name) ? name[0] : name;
     displayName =
       fonts(displayName.charAt(0).toUpperCase(), "bold") +
       fonts(displayName.slice(1), "bold");
-    const otherNames =
-      Array.isArray(name) && name.length > 1
-        ? name.slice(1).join(", ")
-        : "None";
+    const otherNames = a ? a.join(", ") : "None";
 
     output.reply(
       fonts(
