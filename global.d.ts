@@ -12,6 +12,7 @@ import type {
   GameSimulatorProps,
   Item,
 } from "./CommandFiles/types/gamesimu.d.ts";
+import GlobalUtilsX from "./utils-type";
 
 export {};
 
@@ -72,4 +73,6 @@ declare global {
   type CommandEntry = (ctx: CommandContext) => any | Promise<any>;
 
   type UserData = Cass.UserData;
+
+  var utils: typeof GlobalUtilsX;
 }
