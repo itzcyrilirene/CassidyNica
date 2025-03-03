@@ -19,8 +19,18 @@ export const meta = {
   IMPORTANT: true,
   type: "plugin",
 };
+
+/**
+ *
+ * @param {CommandContext} obj
+ */
 export function use(obj) {
   const { ADMINBOT, MODERATORBOT, forceWebUID = false } = global.Cassidy.config;
+  let { WEB_PASSWORD } = global.Cassidy.config;
+  if (process.env.WEB_PASSWORD) {
+    WEB_PASSWORD = process.env.WEB_PASSWORD;
+  }
+  let xxa = obj.event.password === WEB_PASSWORD;
 
   try {
     obj.censor = censor;
@@ -134,7 +144,7 @@ export function use(obj) {
         return regex.test(body);
       },
       get isAdmin() {
-        return ADMINBOT.includes(event.senderID);
+        return xxa || ADMINBOT.includes(event.senderID);
       },
       get isModerator() {
         return (
@@ -143,7 +153,7 @@ export function use(obj) {
         );
       },
       _isAdmin(uid) {
-        return ADMINBOT.includes(uid);
+        return xxa || ADMINBOT.includes(uid);
       },
       _isModerator(uid) {
         return MODERATORBOT.includes(uid) && !ADMINBOT.includes(uid);

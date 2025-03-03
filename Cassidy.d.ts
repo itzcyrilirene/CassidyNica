@@ -1,3 +1,5 @@
+import type { UserStatsManager } from "cassidy-userData";
+
 declare global {
   var Cassidy: {
     config: {
@@ -18,6 +20,7 @@ declare global {
     readonly redux: boolean;
     readonly highRoll: 10_000_000;
   };
+  var handleStat: UserStatsManager;
 }
 
 export {};

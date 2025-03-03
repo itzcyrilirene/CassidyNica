@@ -1,6 +1,13 @@
+//
 import { creatorX } from "./handlers/page/webhook.js";
 import { createDiscordListener } from "./handlers/discord/discordLogin.js";
 import { tphHandler } from "./handlers/talkersPH/tphHandler.js";
+
+/**
+ * @type {Map<string, WebSocket>}
+ */
+const wssUsers = new Map();
+
 const http = require("http");
 const WebSocket = require("ws");
 export class Listener {
@@ -76,7 +83,9 @@ export async function postEvent(event) {
 export function formatIP(ip) {
   try {
     ip = ip?.replaceAll("custom_", "");
-
+    if (ip.startsWith(pref)) {
+      return ip;
+    }
     const formattedIP = ip
       .split("")
       .map((char) => {
@@ -110,7 +119,10 @@ export function generateWssMessageID() {
 }
 
 export function formatWssEvent(event) {
-  const { WEB_PASSWORD } = global.Cassidy.config;
+  let { WEB_PASSWORD } = global.Cassidy.config;
+  if (process.env.WEB_PASSWORD) {
+    WEB_PASSWORD = process.env.WEB_PASSWORD;
+  }
   return {
     ...event,
     body: String(event.body || ""),
@@ -126,13 +138,28 @@ export function formatWssEvent(event) {
     messageID: event.messageID || generateWssMessageID(),
     isWss: true,
     isGroup: true,
-    messageReply: event.messageReply || null,
+    messageReply: event.messageReply
+      ? {
+          ...(event.messageReply || null),
+          senderID: event.messageReply?.senderID
+            ? formatIP(`${event.messageReply.senderID}`)
+            : event.password === WEB_PASSWORD
+            ? "wss:admin"
+            : "wss:main",
+        }
+      : null,
     ...(event.type === "message_reaction"
       ? {
-          userID: event.password === WEB_PASSWORD ? "wss:admin" : "wss:main",
-          senderID: "wss:bot",
+          userID: event.userID
+            ? formatIP(`${event.userID}`)
+            : event.password === WEB_PASSWORD
+            ? "wss:admin"
+            : "wss:main",
+
+          senderID: event.senderID ? formatIP(`${event.senderID}`) : "wss:bot",
         }
       : {}),
+    originalEvent: event,
   };
 }
 export class Event {
@@ -164,15 +191,14 @@ export class Event {
     }
 
     if (Object.keys(this.mentions ?? {}).length > 0) {
-      this.mentions = Object.fromEntries(Object.entries(this.mentions).map((i) => [
-        formatIP(i[0]),
-        i[1],
-      ]));
+      this.mentions = Object.fromEntries(
+        Object.entries(this.mentions).map((i) => [formatIP(i[0]), i[1]])
+      );
     }
   }
 }
-
 import fs from "fs";
+import fetchMeta from "./CommandFiles/modules/fetchMeta.js";
 export function genericPage(...replacer) {
   return pageParse("public/generic.html", ...replacer);
 }
@@ -331,6 +357,99 @@ export class WssAPI {
     return "wss:bot";
   }
 }
+
+/**
+ *
+ * @param {string} userID
+ * @param {WebSocket} socket
+ */
+export async function recordUser(userID = "wss:user", socket) {
+  if (typeof userID !== "string" || !userID) {
+    return console.error(`malformed: ${userID}`);
+  }
+  if (!wssUsers.has(userID)) {
+    wssUsers.set(userID, socket);
+    socket.panelID = userID;
+
+    console.log(`New USER: ${userID}`);
+    const meta = await fetchMeta(userID);
+    const data = await global.handleStat.getCache(formatIP(userID));
+
+    sendAllWS({
+      body: `✅ ${
+        data.name ?? meta.name ?? "Unregistered person"
+      } joined the chat.`,
+      botSend: true,
+    });
+  } else {
+    console.log(`User already: ${userID}`);
+  }
+}
+
+/**
+ * Deletes a user from wssUsers, ensuring proper cleanup.
+ *
+ * @param {string} userID
+ */
+export async function deleteUser(userID) {
+  if (typeof userID !== "string" || !userID) {
+    return console.error(`Malformed userID: ${userID}`);
+  }
+
+  if (wssUsers.has(userID)) {
+    const socket = wssUsers.get(userID);
+
+    if (socket && typeof socket.close === "function") {
+      if (
+        socket.readyState === WebSocket.OPEN ||
+        socket.readyState === WebSocket.CONNECTING
+      ) {
+        socket.close();
+        console.log(`Closed WebSocket for user: ${userID}`);
+      } else {
+        console.log(`WebSocket already closed for user: ${userID}`);
+      }
+    }
+    const data = await global.handleStat.getCache(formatIP(userID));
+    const meta = await fetchMeta(userID);
+
+    wssUsers.delete(userID);
+    sendAllWS({
+      body: `❌ ${
+        data.name ?? meta.name ?? "Unregistered person"
+      } left the chat.`,
+      botSend: true,
+    });
+    console.log(`Deleted USER: ${userID}`);
+  } else {
+    console.log(`User not found: ${userID}`);
+  }
+}
+
+export function sendAllWS(data) {
+  let { body, messageReply, botSend, ...etc } = data;
+  for (const [userID, socket] of wssUsers) {
+    socket.send(
+      JSON.stringify({
+        ...etc,
+        type: messageReply ? "message_reply" : "message",
+        body: String(body),
+        isYou: data.senderID === userID,
+        botSend: !!botSend,
+      })
+    );
+  }
+}
+export function doAllWS(data) {
+  for (const [userID, socket] of wssUsers) {
+    socket.send(data);
+  }
+}
+
+/**
+ *
+ * @param {WebSocket.Server} ws
+ */
 export function handleWebSocket(ws, funcListen) {
   ws.on("connection", (socket) => {
     const api = new WssAPI(socket);
@@ -347,9 +466,16 @@ export function handleWebSocket(ws, funcListen) {
       if (data.botSend) {
         return;
       }
+      if (socket.panelID) {
+        data.senderID ??= socket.panelID;
+      }
+
       switch (data.type) {
         case "login":
-          const { WEB_PASSWORD } = global.Cassidy.config;
+          let { WEB_PASSWORD } = global.Cassidy.config;
+          if (process.env.WEB_PASSWORD) {
+            WEB_PASSWORD = process.env.WEB_PASSWORD;
+          }
           if (data.password !== WEB_PASSWORD) {
             socket.send(
               JSON.stringify({
@@ -359,6 +485,7 @@ export function handleWebSocket(ws, funcListen) {
           } else {
             socket._xPassword = data.password;
           }
+          recordUser(data.panelID, socket);
           break;
         case "message":
           handleMessage(socket, data, listenCall, api);
@@ -370,19 +497,37 @@ export function handleWebSocket(ws, funcListen) {
           handleReaction(socket, data, listenCall, api);
       }
     });
+    socket.on("close", () => {
+      deleteUser(socket.panelID);
+    });
   });
 }
-export function handleReaction(socket, { messageID, reaction }, listenCall) {
+
+/**
+ *
+ * @param {WebSocket} socket
+ */
+export function handleReaction(
+  socket,
+  { messageID, reaction, userID },
+  listenCall
+) {
   const payload = formatWssEvent({
     type: "message_reaction",
     messageID,
     reaction,
+    userID,
   });
   listenCall(payload);
 }
+
+/**
+ *
+ * @param {WebSocket} socket
+ */
 export function handleEditMessage(socket, { body, messageID }) {
   if (socket) {
-    socket.send(
+    doAllWS(
       JSON.stringify({
         type: "message_edit",
         body: String(body),
@@ -391,28 +536,34 @@ export function handleEditMessage(socket, { body, messageID }) {
     );
   }
 }
+
+/**
+ *
+ * @param {WebSocket} socket
+ */
 export function handleMessage(socket, data, listenCall, api) {
   let { body, messageReply, botSend } = data;
   const messageID = generateWssMessageID();
   listenCall ??= function () {};
   if (socket) {
     console.log(`Sending data with messageID: ${messageID}`);
-    socket.send(
-      JSON.stringify({
-        type: messageReply ? "message_reply" : "message",
-        body: String(body),
-        messageID,
-        ...(messageReply
-          ? {
-              messageReply: {
-                senderID: "wss:bot",
-                ...messageReply,
-              },
-            }
-          : {}),
-        botSend: !!botSend,
-      })
-    );
+    // socket.send(
+    //   JSON.stringify({
+    //     type: messageReply ? "message_reply" : "message",
+    //     body: String(body),
+    //     messageID,
+    //     ...(messageReply
+    //       ? {
+    //           messageReply: {
+    //             senderID: "wss:bot",
+    //             ...messageReply,
+    //           },
+    //         }
+    //       : {}),
+    //     botSend: !!botSend,
+    //   })
+    // );
+    sendAllWS({ ...data, messageID });
   }
   if (botSend && api._queue.length > 0) {
     const { resolve } = api._queue.shift();

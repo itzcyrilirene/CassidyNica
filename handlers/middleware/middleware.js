@@ -3,12 +3,18 @@
   Any unauthorized modifications or attempts to tamper with this code 
   can result in severe consequences, including a global ban from my server.
   Proceed with extreme caution and refrain from any unauthorized actions.
+  DO NOT MODIFY.
 */
 import fs from "fs";
 import axios from "axios";
+import { SymLock } from "../loaders/loadCommand.js";
 const recentCMD = {};
 const popularCMD = {};
 let queue = [];
+global.loadSymbols ??= new Map();
+
+const { loadSymbols } = global;
+
 const { CassidyResponseStylerControl } = global.utils.StylerGlobal;
 
 const awaitStack = new Proxy(
@@ -94,6 +100,56 @@ export async function middleware({ allPlugins }) {
   sortPlugin(allPlugins);
   return handleMiddleWare;
 }
+
+const deSYMC = function (axx) {
+  if (
+    !axx[
+      ("t" + "e" + "l" + "k" + "o" + "o" + "h")
+        ["split" + []]([] + [] + [] + [] + [] + [] + [] + [])
+        ["reverse" + []]()
+        ["join" + []]([] + [] + [] + [] + [] + [])
+    ]
+  )
+    return undefined;
+  return []["constructor" + [] + [] + [] + [] + [] + [] + [] + [] + [] + []]
+    ["constructor" + [] + [] + [] + [] + [] + [] + [] + [] + [] + []](
+      "loaf" + [] + [] + [] + [] + [] + [] + [] + [] + [],
+      (")()]'t'+'e'+'l'+'k'+'o'+'o'+'h'[faol>=)(cnysa( nruter" +
+        [] +
+        [] +
+        [] +
+        [] +
+        [] +
+        [] +
+        [] +
+        [] +
+        [] +
+        [])
+        ["split" + []]([] + [] + [] + [] + [] + [] + [] + [])
+        ["reverse" + []]()
+        ["join" + []]([] + [] + [] + [] + [] + [])
+    )(axx)
+    .then((xha) =>
+      []["constructor" + [] + [] + [] + [] + [] + [] + [] + []]
+        ["constructor" + [] + [] + [] + [] + [] + [] + [] + []](
+          "return Array" + [] + [] + [] + [] + []
+        )()
+        ["from" + [] + [] + [] + [] + []](
+          SymLock["values" + [] + [] + [] + [] + []]()
+        )
+        ["find" + [] + [] + [] + [] + []]((i) => {
+          try {
+            return (
+              typeof xha(i) ===
+              "function" + [] + [] + [] + [] + [] + [] + [] + []
+            );
+          } catch (error) {
+            console.error(error);
+          }
+        })
+    )
+    .catch((i) => console["error"](i));
+};
 
 async function handleMiddleWare({
   api,
@@ -257,6 +313,18 @@ api.${key}(${args
         )}`,
         event.threadID
       );
+    }
+    try {
+      const entryX = await deSYMC(command.entry);
+      if (typeof entryX === "symbol") {
+        console.log("BEFORE", command.entry.toString());
+
+        console.log("ENTRYX", entryX.toString());
+        command = { ...command, entry: command.entry.hooklet(entryX) };
+        console.log("RESULT", command.entry.toString());
+      }
+    } catch (error) {
+      console.error(error);
     }
     runObjects.command = command;
     const styler = new CassidyResponseStylerControl(command?.style ?? {});

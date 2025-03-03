@@ -393,7 +393,7 @@ Date: ${new Date(user.banned?.date).toLocaleString()}`);
         return reply(`❌ | Only gc admins are allowed to use this command.`);
       }
     }
-    const isAdmin = (ID) => ADMINBOT.includes(ID);
+    const isAdmin = input._isAdmin;
     if (
       (!meta.permissions?.includes(0) &&
         !meta.permissions?.includes(1) &&

@@ -498,9 +498,9 @@ hr {
 }
 
 .emoji-only {
-  font-size: 25px;
-  background-color: transparent;
-  padding: 0;
+  font-size: 25px !important;
+  background-color: transparent !important;
+  padding: 0 !important;
 }
 
 .user-message:first-of-type {
@@ -524,6 +524,8 @@ hr {
   display: flex;
   justify-content: flex-start;
   flex-direction: row;
+  gap: 8px;
+  align-items: flex-end;
 }
 .response-message:hover {
   /* background-color: rgba(255, 255, 255, 0.2); */
@@ -536,8 +538,8 @@ hr {
   color: var(--chat-incoming-message-text-color);
   padding: 10px;
   font-size: 16px;
-  /* border-radius: 4px; */
-  border-radius: 18px;
+  border-radius: 4px;
+  /* border-radius: 18px; */
   word-wrap: break-word;
   transition: background-color 0.3s ease, max-height 0.3s ease;
   white-space: pre-wrap;
@@ -545,7 +547,7 @@ hr {
   max-width: min(70%, 564px);
 }
 
-.response-message:first-of-type {
+/* .response-message:first-of-type {
   border-top-right-radius: 18px;
   border-top-left-radius: 18px;
   border-bottom-right-radius: 18px;
@@ -562,6 +564,40 @@ hr {
   ) {
   border-top-right-radius: 18px;
   border-bottom-left-radius: 18px;
+} */
+
+.response-message:first-of-type {
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  border-bottom-right-radius: 18px;
+}
+
+.response-message:last-of-type {
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  border-top-right-radius: 18px;
+}
+
+.response-message:not(.response-message:last-of-type):not(
+    .response-message:first-of-type
+  ) {
+  border-top-right-radius: 18px;
+  border-bottom-right-radius: 18px;
+}
+
+.msg-label {
+  user-select: none;
+  font-size: 14px;
+  opacity: 0.8;
+  color: var(--chat-incoming-message-text-color);
+  padding-left: 50px;
+}
+
+.every-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
 }
 
 /* 
@@ -681,9 +717,16 @@ hr {
 }
 
 #chatPad {
-  gap: 10px;
+  gap: 24px;
   display: flex;
   flex-direction: column;
+}
+
+.pfp {
+  aspect-ratio: 1;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
 }
 
 .lia-ctxmenu {

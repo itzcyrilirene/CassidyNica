@@ -29,7 +29,7 @@ const checkMemoryUsage = (normal) => {
     );
   }
 };
-setInterval(checkMemoryUsage, 10000);
+setInterval(() => checkMemoryUsage(false), 1000);
 global.checkMemoryUsage = checkMemoryUsage;
 
 import { createRequire } from "module";
@@ -460,6 +460,7 @@ import rateLimit from "express-rate-limit";
 import { postState } from "./handlers/appstate/handleGetState.js";
 import requestIp from "request-ip";
 import bodyParser from "body-parser";
+import fetchMeta from "./CommandFiles/modules/fetchMeta.js";
 
 const limit = {
   windowMs: 60 * 1000,
@@ -496,6 +497,16 @@ function web(api, funcListen, settings) {
   app.use(express.json({ limit: "200mb" }));
   app.post("/postcred", postState);
   app.use(express.static("public"));
+  app.get("/api/usercache", async (req, res) => {
+    const { uid, format = "yes" } = req.query;
+    const cache = await global.handleStat.getCache(
+      format === "yes" ? formatIP(uid) : uid
+    );
+
+    const userMeta = await fetchMeta(uid);
+
+    res.json({ ...cache, userMeta });
+  });
   app.get("/api/stat", async (req, res) => {
     const { UTYPlayer } = global.utils;
     const data = await global.handleStat.getAll();

@@ -5,6 +5,11 @@ if (!password) {
   password = prompt("Enter your cassidy password.");
   localStorage.setItem("password", password);
 }
+let panelID = localStorage.getItem("panelID");
+if (!panelID) {
+  panelID = prompt("Enter your user ID.");
+  localStorage.setItem("panelID", panelID);
+}
 
 const emojis = ["💜", "😆", "😮", "🥲", "😭", "👍"];
 /* create MAX_PROPERTIES variable.
@@ -62,13 +67,37 @@ window.onload = async () => {
     }
   }
 
-  function loadWs() {
-    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws`);
+  // Get the chatPad, I don't want to type it every time lmao
+  const chatPad = document.getElementById("chatPad");
+  // remember the loadConvo function?
+  const convo = loadConvo();
+  const ccc = document.querySelector("#ccc");
+
+  // convo.forEach((c) => {
+  //   if (c.message) {
+  //     // Just iterate the shit
+  //     return appendSend({ message: c.message, chatPad });
+  //   }
+  //   // if the message is from bot..
+  //   return appendRep({ body: c.body, messageID: c.messageID, chatPad });
+  // });
+  for (const c of convo) {
+    if (c.message) {
+      // Just iterate the shit
+      appendSend({ message: c.message, chatPad });
+      smoothScroll2(ccc);
+      continue;
+    }
+    // if the message is from bot..
+    appendRep({ body: c.body, messageID: c.messageID, chatPad });
+    smoothScroll2(ccc);
   }
 
-  loadWs();
-  const ccc = document.querySelector("#ccc");
+  // After a lot of appending, we gonna scroll the entire page.
+  smoothScroll2(ccc);
+
+  const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws`);
   // You can freely customize this ws.onopen, just make sure it doesn't do stuffs that may break the page :)
 
   ws.onopen = () => {
@@ -76,6 +105,7 @@ window.onload = async () => {
       JSON.stringify({
         type: "login",
         password,
+        panelID,
       })
     );
   };
@@ -99,6 +129,7 @@ window.onload = async () => {
         break;
     }
   };
+
   ws.onclose = () => {
     window.location.href = window.location.href;
     // Lmao refresh
@@ -114,20 +145,6 @@ window.onload = async () => {
     //   });
     // });
   };
-  // Get the chatPad, I don't want to type it every time lmao
-  const chatPad = document.getElementById("chatPad");
-  // remember the loadConvo function?
-  const convo = loadConvo();
-  convo.forEach((c) => {
-    if (c.message) {
-      // Just iterate the shit
-      return appendSend({ message: c.message, chatPad });
-    }
-    // if the message is from bot..
-    return appendRep({ body: c.body, messageID: c.messageID, chatPad });
-  });
-  // After a lot of appending, we gonna scroll the entire page.
-  smoothScroll2(ccc);
 };
 function pushConvo(data) {
   const convo = loadConvo();
@@ -175,13 +192,66 @@ function appendRepOld({ body, messageID, chatPad }) {
 function appendRep({ body, messageID, chatPad }) {
   if (chatPad instanceof HTMLElement) {
     pushConvo({ body, messageID, chatPad });
-    const messageContainer =
+    const info = infos[messageID] ?? {};
+    info.senderID ??= "unknown";
+    // let everyWrapper = Array.from(chatPad.children)
+    //   .reverse()
+    //   .find((everyW) => {
+    //     return everyW.getAttribute("senderid") === info.senderID;
+    //   });
+    let everyWrapper =
       chatPad.lastElementChild &&
       chatPad.lastElementChild &&
-      chatPad.lastElementChild.classList.contains("response-message-container")
+      chatPad.lastElementChild.classList.contains("every-wrapper") &&
+      chatPad.lastElementChild.getAttribute("senderID") === info.senderID
         ? chatPad.lastElementChild
         : document.createElement("div");
+
+    everyWrapper ??= document.createElement("div");
+    everyWrapper.classList.add("every-wrapper");
+    chatPad.append(everyWrapper);
+    const messageContainer =
+      everyWrapper.querySelector(".response-message-container") ??
+      document.createElement("div");
+    everyWrapper.append(messageContainer);
+
+    // const messageContainer =
+    //   chatPad.lastElementChild &&
+    //   chatPad.lastElementChild &&
+    //   chatPad.lastElementChild.classList.contains(
+    //     "response-message-container"
+    //   ) &&
+    //   chatPad.lastElementChild.getAttribute("senderID") === info.senderID
+    //     ? chatPad.lastElementChild
+    //     : document.createElement("div");
     messageContainer.classList.add("response-message-container");
+    everyWrapper.setAttribute("senderid", info.senderID);
+
+    const imgPFP = document.createElement("img");
+    imgPFP.src = "https://www.facebook.com/images/fb_icon_325x325.png";
+    imgPFP.classList.add("pfp");
+    if (!messageContainer.querySelector(".pfp")) {
+      messageContainer.appendChild(imgPFP);
+    }
+
+    if (!everyWrapper.querySelector(".msg-label")) {
+      const label = document.createElement("span");
+      label.classList.add("msg-label");
+      // label.textContent = info.botSend
+      //   ? "Cassidy"
+      //   : userInfo.name ?? "Unregistered";
+      label.textContent = "Loading...";
+      (async () => {
+        const userInfo = await fetchUserCache(info.senderID);
+        label.textContent = info.botSend
+          ? "Cassidy"
+          : userInfo.name ?? userInfo.userMeta?.name ?? "Unregistered";
+
+        imgPFP.src = userInfo.userMeta.image ?? imgPFP.src;
+      })();
+
+      everyWrapper.prepend(label);
+    }
 
     if (messageContainer instanceof HTMLElement) {
       const userMessage = document.createElement("div");
@@ -195,10 +265,11 @@ function appendRep({ body, messageID, chatPad }) {
       if (isEmojiAll(body)) {
         userMessage.classList.add("emoji-only");
       }
+
       wrapper.append(userMessage);
       messageContainer.append(wrapper);
 
-      chatPad.appendChild(messageContainer);
+      // chatPad.appendChild(messageContainer);
       animateSend(userMessage);
       chatPad.addEventListener("scroll", () => {
         ctxmenu.hide();
@@ -449,11 +520,12 @@ function appendSend({ message, chatPad }) {
 
 // this handles messages sent by user/bot
 function handleMessage(data) {
+  console.log(data);
   const chatPad = document.getElementById("chatPad");
   if (data.messageID) {
     infos[data.messageID] = data;
   }
-  if (data.botSend) {
+  if (data.botSend || !data.isYou) {
     appendRep({ body: data.body, messageID: data.messageID, chatPad });
   } else {
     let appended = data.body;
@@ -505,6 +577,7 @@ async function send(isReply, mid, extra = {}) {
 
   messageDoc.value = "";
   adjustRows();
+  await fetchUserCache(panelID, true);
 }
 function chooseReaction(messageID) {
   const reactOpt = document.querySelector("#reactOpt");
@@ -521,11 +594,14 @@ function chooseReaction(messageID) {
   reactBG.disabled = false;
 }
 function sendReact(reaction, messageID) {
+  const { senderID } = infos[messageID] ?? {};
   ws.send(
     JSON.stringify({
       type: "message_reaction",
       reaction,
       messageID,
+      userID: panelID,
+      senderID,
     })
   );
 }
@@ -566,7 +642,7 @@ ${message}`;
           type: "message_reaction",
           messageID,
           reaction: message,
-          userID: 1,
+          userID: panelID,
           ...extra,
         },
       };
@@ -645,12 +721,12 @@ function isScrolledBottom(element, allowance) {
     const scrollPosition = element.scrollTop + element.clientHeight;
     const scrollHeight = element.scrollHeight;
 
-    console.log(
-      `${scrollPosition} >= ${scrollHeight} - ${allowance} (${
-        scrollHeight - allowance
-      })`,
-      scrollPosition >= scrollHeight - allowance
-    );
+    // console.log(
+    //   `${scrollPosition} >= ${scrollHeight} - ${allowance} (${
+    //     scrollHeight - allowance
+    //   })`,
+    //   scrollPosition >= scrollHeight - allowance
+    // );
 
     return scrollPosition >= scrollHeight - allowance;
   }
@@ -984,4 +1060,21 @@ class ContextMenu {
       c.hide();
     }
   }
+}
+
+let allUserCache = [];
+
+async function fetchUserInfo(uid) {
+  const res = await fetch(`/api/usercache?uid=${encodeURIComponent(uid)}`).then(
+    (i) => i.json()
+  );
+  return res;
+}
+
+async function fetchUserCache(uid, refresh = false) {
+  if (!allUserCache[uid] || !refresh) {
+    allUserCache[uid] = await fetchUserInfo(uid);
+  }
+
+  return allUserCache[uid];
 }

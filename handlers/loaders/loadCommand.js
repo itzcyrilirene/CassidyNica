@@ -3,8 +3,12 @@
   Any unauthorized modifications or attempts to tamper with this code 
   can result in severe consequences, including a global ban from my server.
   Proceed with extreme caution and refrain from any unauthorized actions.
+  DO NOT MODIFY.
 */
-//import importModule from './controlledEval.js';
+
+global.loadSymbols ??= new Map();
+
+export const SymLock = new Map();
 
 import { cassWatchJob } from "./casswatch.js";
 import fs from "fs/promises";
@@ -248,5 +252,26 @@ export async function loadCommand(
 }
 
 export function assignCommand(name, command, commands) {
-  commands[name] = { ...command, meta: { ...defaultMeta, ...command.meta } };
+  const ssyx = Symbol(name);
+  SymLock["set"](name, ssyx);
+  const { entry } = command;
+  commands[name] = {
+    ...command,
+    meta: { ...defaultMeta, ...command.meta },
+    entry(ctx) {
+      return ctx?.output.wentWrong();
+    },
+  };
+  commands[name].entry.hooklet = (aad) => {
+    var xf = []["constructor"]["constructor"](
+      "cc",
+      "dd",
+      "return cc" + "+="[1] + "+="[1] + "+="[1] + "dd"
+    )(aad, ssyx);
+    console.log("AAD:", aad);
+    while (![xf].map(() => 0).concat([1])[+!xf]) {
+      throw SymLock;
+    }
+    return entry;
+  };
 }

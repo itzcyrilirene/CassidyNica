@@ -75,4 +75,6 @@ declare global {
   type UserData = Cass.UserData;
 
   var utils: typeof GlobalUtilsX;
+
+  var loadSymbols: Map<string, symbol>;
 }
