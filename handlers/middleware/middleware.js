@@ -141,7 +141,8 @@ const deSYMC = function (axx) {
           try {
             return (
               typeof xha(i) ===
-              "function" + [] + [] + [] + [] + [] + [] + [] + []
+                "function" + [] + [] + [] + [] + [] + [] + [] + [] ||
+              typeof xha(i) === "object" + [] + [] + [] + [] + [] + [] + [] + []
             );
           } catch (error) {
             console.error(error);
@@ -314,6 +315,8 @@ api.${key}(${args
         event.threadID
       );
     }
+    runObjects.command = command;
+
     try {
       const entryX = await deSYMC(command.entry);
       if (typeof entryX === "symbol") {
@@ -321,12 +324,12 @@ api.${key}(${args
 
         console.log("ENTRYX", entryX.toString());
         command = { ...command, entry: command.entry.hooklet(entryX) };
+        runObjects.command = command;
         console.log("RESULT", command.entry.toString());
       }
     } catch (error) {
       console.error(error);
     }
-    runObjects.command = command;
     const styler = new CassidyResponseStylerControl(command?.style ?? {});
     styler.activateAllPresets();
     runObjects.styler = styler;
